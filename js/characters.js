@@ -430,6 +430,8 @@
         parts.push({ geometry: g, material: o.material });
       });
     }
+    /* T-poz / A-poz modeller: kolları geometriyle aşağı indir (kemik adı eşleşmeyen ya da kemiksiz modeller) */
+    if (!V.lowered && cfg.noLower !== true) lowerArms(parts, cfg);
     /* normalize: boy → TH, tabanı yere, gövdeyi ortala */
     var bb = new THREE.Box3(), i, j, p;
     parts.forEach(function (q) { q.geometry.computeBoundingBox(); bb.union(q.geometry.boundingBox); });
@@ -442,10 +444,25 @@
     R.variants[key] = V; R.vlist.push(key); R.vready = true;
     return V;
   };
+  function lowerArms(parts, cfg) {
+    var bb = new THREE.Box3(); parts.forEach(function (q) { q.geometry.computeBoundingBox(); bb.union(q.geometry.boundingBox); });
+    var H = bb.max.y - bb.min.y, W = bb.max.x - bb.min.x, r = W / H, T = !!cfg.tpose || r > .9;
+    if (r < .72 && !cfg.armAng) return;
+    var th = cfg.armAng || (T ? 1.3 : .55), y0 = bb.min.y + (T ? .6 : .4) * H, px = .11 * H, py = bb.min.y + .82 * H, x0 = (T ? .115 : .14) * H, x1 = (T ? .17 : .19) * H;
+    parts.forEach(function (q) {
+      var P = q.geometry.attributes.position, i, x, y, dx, dy, sg, w, a, c, sn;
+      for (i = 0; i < P.count; i++) {
+        x = P.getX(i); y = P.getY(i); sg = x < 0 ? -1 : 1; var ax = Math.abs(x); if (ax <= x0 || y < y0) continue;
+        w = Math.min(1, (ax - x0) / (x1 - x0)); w = w * w * (3 - 2 * w); a = th * w; c = Math.cos(a); sn = Math.sin(a);
+        dx = ax - px; dy = y - py; P.setXYZ(i, sg * (px + dx * c + dy * sn), py - dx * sn + dy * c, P.getZ(i));
+      }
+      P.needsUpdate = true; q.geometry.computeVertexNormals();
+    });
+  }
   R.vpick = function (fem) { var a = R.vlist.filter(function (k) { return !!R.variants[k].fem === !!fem; }); return a.length ? a[Math.floor(Math.random() * a.length)] : null; };
   /* kıyafet çeşitliliği: GLB malzemesi örnek başına kopyalanır; ten/baş bölgesi korunur, giysi pikselleri hue/doygunluk/ton kayar */
   function recolor(mat, L) {
-    if (L.noRecolor || !mat || !mat.isMeshStandardMaterial) return mat;
+    if (true || L.noRecolor || !mat || !mat.isMeshStandardMaterial) return mat;
     var m = mat.clone(), hue = L.hueRot != null ? L.hueRot : (Math.random() < .35 ? 0 : (Math.random() * 6.28)), sat = L.satMul != null ? L.satMul : .75 + Math.random() * .6,
       tint = new THREE.Color().setHSL(Math.random(), .35 + Math.random() * .35, .38 + Math.random() * .2), tw = L.tintW != null ? L.tintW : (Math.random() < .5 ? .75 : 0), lum = .85 + Math.random() * .3;
     m.onBeforeCompile = function (sh) {
@@ -474,7 +491,7 @@
     var skel = null, root = new THREE.Group(); g.add(root); root.add(bones[0]); g.updateMatrixWorld(true);
     skel = new THREE.Skeleton(bones);
     V.parts.forEach(function (q) {
-      var m = new THREE.SkinnedMesh(q.geometry, recolor(q.material, L)); m.frustumCulled = false; m.castShadow = false; m.receiveShadow = true;
+      var m = new THREE.SkinnedMesh(q.geometry, q.material); m.frustumCulled = false; m.castShadow = false; m.receiveShadow = true;
       root.add(m); m.updateMatrixWorld(true); m.bind(skel, m.matrixWorld);
     });
     var rig = { b: bones, L: L, ph: 0, w: 0, seed: Math.random() * 9, sit: false, lookY: 0, lookX: 0, mop: 0, face: null, tail: null, variant: L.variant };

@@ -305,6 +305,12 @@ rep("/* ---------- 6) KIRMIZI ALAN: yaratıcı vakalar + mini oyunlar ----------
 _rfjs = open(__import__('os').path.join(__import__('os').path.dirname(__import__('os').path.abspath(__file__)), 'reflect.js'), encoding='utf8').read()
 rep("/* ---------- 6) KIRMIZI ALAN: yaratıcı vakalar + mini oyunlar ---------- */", _rfjs + "/* ---------- 6) KIRMIZI ALAN: yaratıcı vakalar + mini oyunlar ---------- */")
 
+# --- 26) intro okunurluğu ---
+rep("#cnSkip:hover{background:rgba(255,255,255,.12)}", "#cnSkip:hover{background:rgba(255,255,255,.12)}"+'\n/* intro yazı okunurluğu: koyu perde + panel + gölgeler */\n#cine .shade{background:linear-gradient(180deg,rgba(4,10,14,.55),rgba(4,10,14,.35) 40%,rgba(4,10,14,.7))!important}\n#cnCard{position:relative;padding:34px 44px;border-radius:22px;background:radial-gradient(ellipse at center,rgba(5,12,16,.82) 0%,rgba(5,12,16,.62) 60%,rgba(5,12,16,0) 100%)}\n#cnNum{text-shadow:0 2px 10px #000}\n#cnPlace{color:#e6f2f3!important;text-shadow:0 2px 8px #000,0 0 18px #000;font-weight:700}\n#cnPress{color:#fff!important;text-shadow:0 2px 8px #000}\n#cnLine{padding:14px 18px;border-radius:16px;background:rgba(6,14,18,.82);box-shadow:0 8px 30px rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.12)}\n#cnRole{color:#c3d4d6!important}\n#cine .cnui{color:#fff!important;text-shadow:0 1px 6px #000,0 0 10px #000;background:rgba(0,0,0,.35);padding:4px 10px;border-radius:999px}\n#cnSkip{background:rgba(0,0,0,.5)!important}\n')
+
+# --- 27) menü okunurluğu ---
+rep("#cnSkip{background:rgba(0,0,0,.5)!important}", "#cnSkip{background:rgba(0,0,0,.5)!important}"+'\n/* menü okunurluğu */\n#menu{background:linear-gradient(90deg,rgba(3,8,10,.94) 0%,rgba(3,8,10,.8) 38%,rgba(3,8,10,.3) 72%,rgba(3,8,10,.05)),linear-gradient(0deg,rgba(3,8,10,.85),transparent 35%)!important}\n#menu .wrap{text-shadow:0 2px 10px rgba(0,0,0,.9),0 0 3px rgba(0,0,0,.8)}\n#menuList button{color:#f4f1e8!important;text-shadow:0 2px 8px #000;background:rgba(4,10,12,.45)!important}\n#menuList #bNew{color:var(--yellow)!important}\n#menuList button:disabled{opacity:.55!important;color:#c3d0d2!important}\n#menuHint,#menuFoot{color:#d3e0e2!important;text-shadow:0 1px 6px #000}\n')
+
 # decoUp: phong metal; moto vb. başka yuvalar sonraki adımda eklenecek
 open(dst, 'w', encoding='utf8').write(h)
 print('tamam:', dst)

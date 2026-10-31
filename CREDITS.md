@@ -32,3 +32,6 @@ Bu üç model Creative Commons Attribution 4.0 lisansıyla paylaşılmıştır (
 
 ### Klinik içerik notu
 - Bilgisayar ekranındaki EKG ve BT görüntüleri oyun içinde kodla (prosedürel) çizilir; harici kitap/atlas görüntüsü kopyalanmamıştır.
+
+## Kullanıcı tarafından sağlanan karakter modelleri (v_*.glb)
+models/v_*.glb: proje sahibinin eklediği insan modelleri; dokular küçültüldü, animasyonlar çıkarıldı, T-pozlu olanların kolları oyun kodunda aşağı indirilir. Orijinal lisans/yazar bilgileri model kaynaklarından kontrol edilmelidir.

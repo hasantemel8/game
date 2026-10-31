@@ -60,7 +60,21 @@
     { key: 'hoodie', file: 'patient_hoodie.glb', height: 1.74, rotY: Math.PI / 2 },
     { key: 'tee',    file: 'patient_tee.glb',    height: 1.80 },
     { key: 'anna',   file: 'patient_anna.glb',   height: 1.76, armDown: 1.25, fem: true },
-    { key: 'scanf',  file: 'patient_scanf.glb',  height: 1.74, rotX: -Math.PI / 2, fem: true }
+    { key: 'scanf',  file: 'patient_scanf.glb',  height: 1.74, rotX: -Math.PI / 2, fem: true },
+    /* kullanıcının eklediği modeller (v_*.glb): kolları kod indirir, dokular küçültüldü */
+    { key: 'justman',  file: 'v_justman.glb',  height: 1.76 },
+    { key: 'koyluerk', file: 'v_koyluerkek.glb', height: 1.74, tpose: true },
+    { key: 'yelekli',  file: 'v_yelekli.glb',  height: 1.76, tpose: true },
+    { key: 'cifci',    file: 'v_cifci.glb',    height: 1.72 },
+    { key: 'koylukad', file: 'v_koylukadin.glb', height: 1.62, fem: true, tpose: true },
+    { key: 'kadin2',   file: 'v_kadin2.glb',   height: 1.65, fem: true, tpose: true },
+    { key: 'kadin3',   file: 'v_kadin3.glb',   height: 1.64, fem: true, tpose: true },
+    { key: 'genckiz',  file: 'v_genckiz.glb',  height: 1.66, fem: true },
+    { key: 'man',      file: 'v_man.glb',      height: 1.80 },
+    { key: 'kurta',    file: 'v_kurta.glb',    height: 1.74 },
+    { key: 'hindi',    file: 'v_hindi.glb',    height: 1.76 },
+    { key: 'tulum',    file: 'v_tulum.glb',    height: 1.78 },
+    { key: 'ceket',    file: 'v_ceket.glb',    height: 1.79 }
   ]);
 
   if (ABG.rig && ABG.rig.loadHand && Q.get('rig') !== '0') ABG.rig.loadHand(BASE + 'hand_pov.glb');
