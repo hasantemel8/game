@@ -54,6 +54,13 @@
     locker:    { file: 'locker.glb', h: 1.9 }
   };
 
+  /* hazır insan modelleri (CC-BY): erkek yetişkin hastalara varyasyon; bkz. CREDITS.md */
+  if (ABG.rig && ABG.rig.loadVariants && Q.get('rig') !== '0') ABG.rig.loadVariants(BASE, [
+    { key: 'suit',   file: 'patient_suit.glb',   height: 1.78, armDown: 1.22 },
+    { key: 'hoodie', file: 'patient_hoodie.glb', height: 1.74, rotY: Math.PI / 2 },
+    { key: 'tee',    file: 'patient_tee.glb',    height: 1.80 }
+  ]);
+
   var loader = new THREE.GLTFLoader();
   var ENV = ABG.pbr ? ABG.envI : 0;
 

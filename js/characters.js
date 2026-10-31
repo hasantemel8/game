@@ -293,6 +293,7 @@
 
   /* ===================== karakter üretimi ===================== */
   R.make = function (L) {
+    if (L && L.variant && R.variants[L.variant]) return makeVariant(L);
     L = Object.assign({ skin: 0xe0ac84, shirt: 0xffffff, pants: 0x2f7d6a, hair: 0x3b2a1f }, L || {});
     var g = new THREE.Group(), bones = [], i;
     for (i = 0; i < NAMES.length; i++) { var b = new THREE.Bone(); b.name = NAMES[i]; bones.push(b); }
@@ -348,6 +349,117 @@
     R.list.push(g);
     restPose(rig);
     return g;
+  };
+
+  /* ===================== hazır / taranmış modelleri aynı iskelete bağla ===================== */
+  /* CC-BY lisanslı .glb modeller (bkz. CREDITS.md): geometri şablon gövdeden ağırlık aktarımıyla bizim 19 kemikli iskelete bağlanır;
+     böylece yürüyüş, oturma, nefes ve bakış kodu hazır modellerde de aynen çalışır. */
+  R.variants = {}; R.vlist = []; R.vready = false;
+  var TH = 1.745, TMPL = null;
+  function tmpl() {
+    if (TMPL) return TMPL;
+    var M = bodyMesh({ skin: 0xe0ac84, shirt: 0xffffff, pants: 0x333333, shoe: 0xffffff }), n = M.pos.length / 3, grid = new Map(), C = .05, i;
+    for (i = 0; i < n; i++) { var k = Math.floor(M.pos[i * 3] / C) + ',' + Math.floor(M.pos[i * 3 + 1] / C) + ',' + Math.floor(M.pos[i * 3 + 2] / C); var a = grid.get(k); if (a) a.push(i); else grid.set(k, [i]); }
+    TMPL = { M: M, n: n, grid: grid, C: C }; return TMPL;
+  }
+  function nearest(t, x, y, z) {
+    var C = t.C, ix = Math.floor(x / C), iy = Math.floor(y / C), iz = Math.floor(z / C), best = -1, bd = 1e9, P = t.M.pos;
+    for (var r = 0; r <= 6; r++) {
+      for (var dx = -r; dx <= r; dx++) for (var dy = -r; dy <= r; dy++) for (var dz = -r; dz <= r; dz++) {
+        if (Math.max(Math.abs(dx), Math.abs(dy), Math.abs(dz)) !== r) continue;
+        var a = t.grid.get((ix + dx) + ',' + (iy + dy) + ',' + (iz + dz)); if (!a) continue;
+        for (var q = 0; q < a.length; q++) { var j = a[q], ex = P[j * 3] - x, ey = P[j * 3 + 1] - y, ez = P[j * 3 + 2] - z, d = ex * ex + ey * ey + ez * ez; if (d < bd) { bd = d; best = j; } }
+      }
+      if (best >= 0 && bd < (r * C) * (r * C)) break;
+    }
+    return best;
+  }
+  function transferSkin(geo) {
+    var t = tmpl(), p = geo.attributes.position, n = p.count, si = new Uint16Array(n * 4), sw = new Float32Array(n * 4), M = t.M;
+    for (var i = 0; i < n; i++) {
+      var x = p.getX(i), y = p.getY(i), z = p.getZ(i), o = i * 4;
+      if (y > 1.53) { si[o] = B.head; sw[o] = 1; }
+      else if (y > 1.46) { var u = (y - 1.46) / .07; si[o] = B.neck; sw[o] = 1 - u; si[o + 1] = B.head; sw[o + 1] = u; }
+      else { var j = nearest(t, x, y, z); if (j < 0) { si[o] = B.spine2; sw[o] = 1; } else for (var k = 0; k < 4; k++) { si[o + k] = M.si[j * 4 + k]; sw[o + k] = M.sw[j * 4 + k]; } }
+    }
+    geo.setAttribute('skinIndex', new THREE.Uint16BufferAttribute(si, 4)); geo.setAttribute('skinWeight', new THREE.Float32BufferAttribute(sw, 4));
+  }
+  function stdMat(m, opt) {
+    var o = { color: 0xffffff, roughness: .85, metalness: 0, skinning: true, envMapIntensity: ABG.envI || .25 };
+    if (m.map) o.map = m.map; if (m.normalMap) o.normalMap = m.normalMap;
+    if (m.transparent) { o.transparent = true; o.depthWrite = m.depthWrite !== false; } if (m.alphaTest) o.alphaTest = m.alphaTest; o.side = m.side;
+    var nm = new THREE.MeshStandardMaterial(o);
+    if (m.color && !m.isMeshBasicMaterial) nm.color.copy(m.color);
+    if (opt && opt.rough != null) nm.roughness = opt.rough;
+    return nm;
+  }
+  /* yüklenmiş sahneyi (kemikli ya da sabit) normalize edip ağırlık aktar; V = { parts:[{geometry,material}] } */
+  R.registerVariant = function (key, gltf, cfg) {
+    var root = gltf.scene, parts = [], V = { key: key, cfg: cfg || {}, parts: parts };
+    root.updateMatrixWorld(true);
+    var skinned = [];
+    root.traverse(function (o) { if (o.isSkinnedMesh) skinned.push(o); });
+    if (skinned.length) {                                              /* T-poz → kollar aşağı (kendi kemik ağırlıklarıyla bake) */
+      var wq = new THREE.Quaternion(), pq = new THREE.Quaternion(), zq = new THREE.Quaternion(), wp = new THREE.Vector3();
+      var lowered = false;
+      skinned[0].skeleton.bones.forEach(function (b) {
+        if (!/(Left|Right)Arm(_\d+)?$/i.test(b.name)) return;
+        b.getWorldPosition(wp); var sg = wp.x > 0 ? 1 : -1;
+        b.getWorldQuaternion(wq); zq.setFromAxisAngle(new THREE.Vector3(0, 0, 1), -sg * (cfg.armDown || 1.22)); wq.premultiply(zq);
+        b.parent.getWorldQuaternion(pq); b.quaternion.copy(pq.invert().multiply(wq)); lowered = true;
+      });
+      root.updateMatrixWorld(true); skinned.forEach(function (m) { m.skeleton.update(); });
+      skinned.forEach(function (m) {
+        var g0 = m.geometry, p0 = g0.attributes.position, n = p0.count, pos = new Float32Array(n * 3), v = new THREE.Vector3();
+        for (var i = 0; i < n; i++) { v.fromBufferAttribute(p0, i); m.boneTransform(i, v); v.applyMatrix4(m.matrixWorld); pos[i * 3] = v.x; pos[i * 3 + 1] = v.y; pos[i * 3 + 2] = v.z; }
+        var g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+        if (g0.attributes.uv) g.setAttribute('uv', g0.attributes.uv.clone()); if (g0.index) g.setIndex(g0.index.clone());
+        g.computeVertexNormals(); parts.push({ geometry: g, material: m.material });
+      });
+      V.lowered = lowered;
+    } else {
+      root.traverse(function (o) {
+        if (!o.isMesh) return; var g = o.geometry.clone(); g.applyMatrix4(o.matrixWorld); if (cfg.rotY) g.rotateY(cfg.rotY);
+        parts.push({ geometry: g, material: o.material });
+      });
+    }
+    /* normalize: boy → TH, tabanı yere, gövdeyi ortala */
+    var bb = new THREE.Box3(), i, j, p;
+    parts.forEach(function (q) { q.geometry.computeBoundingBox(); bb.union(q.geometry.boundingBox); });
+    var H = bb.max.y - bb.min.y, s = TH / H, cx = 0, cz = 0, cn = 0;
+    parts.forEach(function (q) { p = q.geometry.attributes.position; for (i = 0; i < p.count; i += 3) { var yy = (p.getY(i) - bb.min.y) / H; if (yy > .35 && yy < .6) { cx += p.getX(i); cz += p.getZ(i); cn++; } } });
+    cx = cn ? cx / cn : (bb.min.x + bb.max.x) / 2; cz = cn ? cz / cn : (bb.min.z + bb.max.z) / 2;
+    var mt = new THREE.Matrix4().makeScale(s, s, s).multiply(new THREE.Matrix4().makeTranslation(-cx, -bb.min.y, -cz));
+    parts.forEach(function (q) { q.geometry.applyMatrix4(mt); transferSkin(q.geometry); q.material = stdMat(q.material, cfg); });
+    V.height = cfg.height || 1.78; V.k = V.height / TH;
+    R.variants[key] = V; R.vlist.push(key); R.vready = true;
+    return V;
+  };
+  function makeVariant(L) {
+    var V = R.variants[L.variant], g = new THREE.Group(), bones = [], i;
+    for (i = 0; i < NAMES.length; i++) { var b = new THREE.Bone(); b.name = NAMES[i]; bones.push(b); }
+    for (i = 0; i < bones.length; i++) { var p = PARENT[i]; if (p < 0) bones[i].position.set(WP[i][0], WP[i][1], WP[i][2]); else { bones[i].position.set(WP[i][0] - WP[p][0], WP[i][1] - WP[p][1], WP[i][2] - WP[p][2]); bones[p].add(bones[i]); } }
+    var skel = null, root = new THREE.Group(); g.add(root); root.add(bones[0]); g.updateMatrixWorld(true);
+    skel = new THREE.Skeleton(bones);
+    V.parts.forEach(function (q) {
+      var m = new THREE.SkinnedMesh(q.geometry, q.material); m.frustumCulled = false; m.castShadow = false; m.receiveShadow = true;
+      root.add(m); m.updateMatrixWorld(true); m.bind(skel, m.matrixWorld);
+    });
+    var rig = { b: bones, L: L, ph: 0, w: 0, seed: Math.random() * 9, sit: false, lookY: 0, lookX: 0, mop: 0, face: null, tail: null, variant: L.variant };
+    var dummy = new THREE.Group(), sh = new THREE.Mesh(new THREE.CircleGeometry(.42, 14), new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: .3, depthWrite: false }));
+    sh.rotation.x = -Math.PI / 2; sh.position.y = .012; sh.userData.noHit = true; g.add(sh);
+    g.userData = { rig: rig, legs: dummy, up: bones[B.pelvis], sl: dummy, sh: sh, seed: rig.seed, ph: 0, mv: -9, L: bones[B.hipL], R: bones[B.hipR], kL: bones[B.knL], kR: bones[B.knR],
+      arms: [{ a: bones[B.shL], e: bones[B.elL], s: 1 }, { a: bones[B.shR], e: bones[B.elR], s: -1 }] };
+    g.scale.setScalar(V.k * (L.scale || 1));
+    R.list.push(g); restPose(rig);
+    return g;
+  }
+  /* models/ içindeki hazır modelleri yükle (glb-props.js çağırır) */
+  R.loadVariants = function (base, list, done) {
+    if (!THREE.GLTFLoader) return; var loader = new THREE.GLTFLoader();
+    list.forEach(function (c) {
+      loader.load(base + c.file, function (gl) { try { R.registerVariant(c.key, gl, c); if (window.console) console.info('[VAR] hazır:', c.key); } catch (e) { if (window.console) console.warn('[VAR] hata', c.key, e); } if (done) done(c.key); }, undefined, function () { if (window.console) console.info('[VAR] yok:', c.file); });
+    });
   };
 
   /* ===================== hareket ===================== */
@@ -438,17 +550,17 @@
     r.lookY = ease(r.lookY, ty, Math.min(1, dt * 3.5)); r.lookX = ease(r.lookX, tx, Math.min(1, dt * 3.5));
     b[B.spine2].rotation.y = ease(b[B.spine2].rotation.y, r.lookY * .22, e); b[B.neck].rotation.y = ease(b[B.neck].rotation.y, r.lookY * .35, e); b[B.head].rotation.y = ease(b[B.head].rotation.y, r.lookY * .45, e);
     b[B.head].rotation.x = ease(b[B.head].rotation.x, r.lookX + Math.sin(t * .7 + r.seed) * .01, e); b[B.neck].rotation.x = ease(b[B.neck].rotation.x, 0, e);
-    r.face.gx = ease(r.face.gx, gx, Math.min(1, dt * 8)); r.face.gy = ease(r.face.gy, gy, Math.min(1, dt * 8));
+    if (r.face) { r.face.gx = ease(r.face.gx, gx, Math.min(1, dt * 8)); r.face.gy = ease(r.face.gy, gy, Math.min(1, dt * 8)); }
     return true;
   };
 
   /* ===================== yüz güncellemesi ===================== */
-  R.express = function (g, name, dur) { var r = g && g.userData && g.userData.rig; if (!r) return; r.face.expr = name; r.face.exprT = dur || 2; };
-  R.talk = function (g, dur) { var r = g && g.userData && g.userData.rig; if (!r) return; r.face.talk = Math.max(r.face.talk, dur || 2); };
+  R.express = function (g, name, dur) { var r = g && g.userData && g.userData.rig; if (!r || !r.face) return; r.face.expr = name; r.face.exprT = dur || 2; };
+  R.talk = function (g, dur) { var r = g && g.userData && g.userData.rig; if (!r || !r.face) return; r.face.talk = Math.max(r.face.talk, dur || 2); };
   R.update = function (dt, S, cam) {
     for (var i = R.list.length - 1; i >= 0; i--) {
       var g = R.list[i]; if (!g.parent && !g.userData.keepFace) continue;
-      var r = g.userData.rig, f = r.face;
+      var r = g.userData.rig, f = r.face; if (!f) continue;
       if (cam && g.visible) { var dx = cam.position.x - g.position.x, dz = cam.position.z - g.position.z; if (dx * dx + dz * dz > 400) continue; }
       if (g.visible === false) continue;
       f.blinkT -= dt; if (f.blinkT <= 0) { f.blink = 1; f.blinkT = 2.2 + Math.random() * 3.6; f.blinkEnd = .13; }

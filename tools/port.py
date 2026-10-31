@@ -181,6 +181,19 @@ rep("var g=femStaff({skin:0xd9a47e,shirt:0x8e3b5f,pants:0x5a2440,hair:0x2a1a12,e
 rep("var up=g.userData.up;if(up){var sc=sph(.215,Lm(0xf2a65a),0,.9,-.03,up);sc.scale.set(1.02,.8,1.04)", "var up=g.userData.up;if(up&&!g.userData.rig){var sc=sph(.215,Lm(0xf2a65a),0,.9,-.03,up);sc.scale.set(1.02,.8,1.04)")
 rep("buildCleaner=function(){var g=femStaff({skin:0xc99272,", "buildCleaner=function(){var g=femStaff({rig:1,fem:1,hairStyle:'scarf',scarf:0xe8dcc8,iris:'#4a2e1c',skin:0xc99272,")
 
+
+# --- 10) pembe "DOKTOR" alanı + doktor masası + epikriz ekranı kaldırıldı (işlevsizdi) ---
+_a = h.index("  /* doktor odası / epikriz */")
+_e = "act:function(){openEpi()}});"
+_b = h.index(_e, _a) + len(_e)
+h = h[:_a] + "  /* (doktor masası / epikriz kaldırıldı) */" + h[_b:]
+rep("  floorText('DOKTOR',2.1,.55,'#b0306f',8.6,-.7,0);\n", "")
+
+
+# --- 11) hazır (CC-BY) insan modelleri: erkek yetişkin hastalara varyasyon olarak ---
+rep("function makePatient(enc,lookKey){var p={n:++S.pn,enc:enc,age:(enc.age>10&&!enc.vk)?enc.age+Math.round(rnd(-3,3)):enc.age,g:makePerson(withFace(randLook(lookKey||enc.look),enc)),",
+    "function pickVar(L,enc){try{var R=ABG.rig;if(!R||!R.vready||L.bird||L.extra||enc.sex!=='Erkek'||enc.age<20||enc.age>68||Math.random()>.45)return L;var n=0;P.forEach(function(q){if(q.g&&q.g.userData.rig&&q.g.userData.rig.variant)n++});if(n>=(MOB?3:7))return L;L.rig=1;L.variant=pick(R.vlist)}catch(e){}return L}\nfunction makePatient(enc,lookKey){var p={n:++S.pn,enc:enc,age:(enc.age>10&&!enc.vk)?enc.age+Math.round(rnd(-3,3)):enc.age,g:makePerson(pickVar(withFace(randLook(lookKey||enc.look),enc),enc)),")
+
 # decoUp: phong metal; moto vb. başka yuvalar sonraki adımda eklenecek
 open(dst, 'w', encoding='utf8').write(h)
 print('tamam:', dst)

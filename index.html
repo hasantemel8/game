@@ -820,13 +820,7 @@ function build(){
   var sticky=new THREE.Mesh(new THREE.PlaneGeometry(.3,.3),new THREE.MeshBasicMaterial({map:noteTexture(['K+ yüksek!','E','Ne yapıyoruz?'],'#f3e27a','#2a2410',256,160).t}));sticky.position.set(-16.05,1.1,-0.5);sticky.rotation.y=Math.PI/2;scene.add(sticky);
   fixedTargets.push({pos:V(-16,1.1,-1.2),r:3.6,label:'Laboratuvar bilgisayarı',sub:'Sonuçları gör',act:function(){openLab()}});
 
-  /* doktor odası / epikriz */
-  box(2.6,.78,1,Lm(0xb89a72),8.5,.39,-1.8);box(2.7,.05,1.1,Lm(0x6d5a3d),8.5,.8,-1.8);col(8.5,-1.8,2.7,1.1);
-  box(.7,.45,.05,Lm(0x1c2a30),8.2,1.1,-2.1);var et=noteTexture(['EPİKRİZ YAZ','Tanı:','Tedavi:'],'#eef3f7','#14262a',256,160);var esc=new THREE.Mesh(new THREE.PlaneGeometry(.64,.38),new THREE.MeshBasicMaterial({map:et.t}));esc.position.set(8.2,1.1,-2.07);scene.add(esc);
-  var folders=['KONSÜLTASYON','TABURCU','YATIŞ','SEVK','RAPOR'],fcol=['#f0c36a','#d6c28d','#e3b66a','#cda45a','#e0d3a8'];
-  folders.forEach(function(f,i){var nt=noteTexture([f],fcol[i],'#5b4220',256,64);var m=new THREE.Mesh(new THREE.BoxGeometry(.5,.06,.34),[Lm(0xd8c48e),Lm(0xd8c48e),new THREE.MeshLambertMaterial({map:nt.t}),Lm(0xd8c48e),Lm(0xd8c48e),Lm(0xd8c48e)]);m.position.set(9.4,.85+i*.065,-1.8);m.rotation.y=(i%2?.1:-.08);scene.add(m)});
-  S.epiNote=noteTexture(['Daha 0','hasta var'],'#f3e27a','#2a2410',256,128);var nm=new THREE.Mesh(new THREE.PlaneGeometry(.24,.12),new THREE.MeshBasicMaterial({map:S.epiNote.t}));nm.position.set(8.9,1.0,-2.2);nm.rotation.x=-.2;scene.add(nm);
-  fixedTargets.push({pos:V(8.5,1.1,-1.8),r:3.6,label:'Doktor masası',sub:'Epikriz yaz',act:function(){openEpi()}});
+  /* (doktor masası / epikriz kaldırıldı) */
 
   /* yataklar */
   var bedBase=Lm(0xcfd8dc),matt=Lm(0x9ad0e8),mon=function(x,z,red,bed){makeMonitor(x,z,red,bed)};
@@ -1248,7 +1242,8 @@ function freeSeat(){var a=seats.filter(function(s){return !s.taken});return a.le
 function newBar(){var g=new THREE.Group();var bg=box(.6,.07,.02,Bm(0x111111),0,0,0,g);var fl=box(.56,.045,.03,Bm(0x34d58a),0,0,.01,g);g.userData.fl=fl;g.userData.noHit=true;scene.add(g);return g}
 var SKINS=[0xe8b898,0xe0ac84,0xd4a07e,0xc68863,0x9c6a4a,0x7a4e36],SHIRTS=[0xc9d6df,0x7a8f6a,0xe56fa0,0x6a5acd,0xd4a15a,0x4f8fbf,0x9c4f4f,0x3a3f45,0xe3e3df],HAIRS=[0x2b1d14,0x3b2a1f,0x111111,0x5b4636,0x8a5a2b],RSK=['karpuz','yasli','terli','cocuk','telefon','kirik','drama','yaslitv','canta','boks','tavuk','ofkeli'],NOSKIN=['penguen','uzayli','robot','dino','horoz','pasta','guvercin'];
 function randLook(key){var L=Object.assign({},LOOKS[key]);if(L.bird)return L;if(NOSKIN.indexOf(key)<0)L.skin=pick(SKINS);if(RSK.indexOf(key)>=0)L.shirt=pick(SHIRTS);if(L.hair&&key!=='yasli'&&key!=='yaslitv')L.hair=pick(HAIRS);return L}
-function makePatient(enc,lookKey){var p={n:++S.pn,enc:enc,age:(enc.age>10&&!enc.vk)?enc.age+Math.round(rnd(-3,3)):enc.age,g:makePerson(withFace(randLook(lookKey||enc.look),enc)),state:'walk',patience:enc.pat||90,max:enc.pat||90,busy:false,t:0,bar:null};scene.add(p.g);p.g.userData.pat=p;P.push(p);return p}
+function pickVar(L,enc){try{var R=ABG.rig;if(!R||!R.vready||L.bird||L.extra||enc.sex!=='Erkek'||enc.age<20||enc.age>68||Math.random()>.45)return L;var n=0;P.forEach(function(q){if(q.g&&q.g.userData.rig&&q.g.userData.rig.variant)n++});if(n>=(MOB?3:7))return L;L.rig=1;L.variant=pick(R.vlist)}catch(e){}return L}
+function makePatient(enc,lookKey){var p={n:++S.pn,enc:enc,age:(enc.age>10&&!enc.vk)?enc.age+Math.round(rnd(-3,3)):enc.age,g:makePerson(pickVar(withFace(randLook(lookKey||enc.look),enc),enc)),state:'walk',patience:enc.pat||90,max:enc.pat||90,busy:false,t:0,bar:null};scene.add(p.g);p.g.userData.pat=p;P.push(p);return p}
 function waiting(){return P.filter(function(p){return p.state==='wait'})}
 function spawnWalker(enc){var seat=freeSeat();if(!seat)return false;seat.taken=true;var p=makePatient(enc);p.seat=seat;p.g.position.set(25,0,rnd(6.6,7.4));p.via=[{x:18.6,z:7},{x:15.6,z:7}];p.target={x:seat.x,z:seat.z};p.bar=newBar();p.bar.visible=false;return true}
 function seatNow(enc){var seat=freeSeat();if(!seat)return;seat.taken=true;var p=makePatient(enc);p.seat=seat;p.g.position.set(seat.x,0,seat.z);p.g.rotation.y=seat.face;sitPose(p.g,true);p.state='wait';p.bar=newBar()}
@@ -2080,7 +2075,6 @@ function buildColor(){
   floorText('LAB',1.5,.62,'#5a35ad',-14.95,-1.2,Math.PI/2);
   floorText('İLAÇ',1.5,.58,'#1f7f3d',14.6,1.8,-Math.PI/2);
   floorText('KAHVE',1.5,.5,'#a85f12',1.5,9.55,Math.PI);
-  floorText('DOKTOR',2.1,.55,'#b0306f',8.6,-.7,0);
   floorText('ASANSÖR',2.2,.6,'#0f7f94',-15.7,4.6,Math.PI/2);
   floorText('YEŞİL ALAN',2.8,.7,'#2f8f3a',-3.6,8.4,Math.PI/2);
   floorText('HOŞ GELDİN',2,.5,'#1c7a3b',14.2,9.8,Math.PI/2);
