@@ -25,10 +25,16 @@ CREDITS.md            model/yazılım atıfları
 ## Adres parametreleri (hata ayıklama)
 | Parametre | Etki |
 |-----------|------|
-| `?pbr=0` | PBR katmanını kapatır (eski Lambert/Phong görünüm). Mobilde varsayılan zaten kapalı, `?pbr=1` ile açılır |
+| `?pbr=0` | PBR katmanını kapatır (eski görünüm). Mobilde varsayılan zaten kapalı |
+| `?pbr=lite` | Varsayılan (masaüstü): metal/parlak yüzeyler, zemin ve GLB eşyalar PBR; düz boyalı yüzeyler hafif Lambert |
+| `?pbr=full` | Her şey PBR (daha ağır) |
 | `?glb=0` | GLB modelleri kapatır, eski box/cyl eşyalar kalır |
-| `?exp=0.6` | ton eşleme pozlaması |
-| `?env=0.25` | ortam haritası şiddeti (malzeme başına) |
+| `?exp=0.5` | ton eşleme pozlaması |
+| `?env=0.25` | ortam haritası şiddeti |
+
+## Yeni oyun sürümüne geçmek
+Oyunun ham (tek dosya) HTML'ini güncellediğinde: `python3 tools/port.py ham_oyun.html index.html`.
+Betik değişiklikleri otomatik uygular, oyun kodu değiştiyse hangi satırın uymadığını söyler.
 
 ## Yeni GLB yuvası eklemek
 Oyun kodunda eşyayı kuran yerde:

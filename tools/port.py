@@ -93,6 +93,53 @@ rep("AMBS={a:la,b:lb,g:ag};\n", "AMBS={a:la,b:lb,g:ag};PR.slot('ambulance',_ah,0
 rep("function addItem(n,line,rx,fx,fn){var g=new THREE.Group();fn(g);",
     "function addItem(n,line,rx,fx,fn){var g=new THREE.Group();fn(g);PR.slot('item_'+n.toLowerCase().replace(/ğ/g,'g').replace(/ü/g,'u').replace(/ş/g,'s').replace(/ı/g,'i').replace(/ö/g,'o').replace(/ç/g,'c').replace(/[^a-z0-9]+/g,'_'),g.children.slice(),0,0,0,0,g);")
 
+# --- 8) Doktor dinlenme odası: gerçek bir oda (masa, yatak, dolap), yatağa etkileşimle 15 dk kestirme ---
+rep("PR.slot('defib',[],6.5,0,-9.6,0);", "PR.slot('defib',[],7.95,0,-5.85,0);")
+rep("function napGo(){", r"""function buildRestRoom(){
+  var X0=4.72,X1=7.18,Z0=-10.7,Z1=-6.0,H=2.9,cx=(X0+X1)/2,cz=(Z0+Z1)/2;
+  var wallM=Lm(0xe8e1d2),trim=Lm(0x4e6b73),wood=Lm(0x8d6e63),dkw=Lm(0x5d4037),dk=Lm(0x2a3236);
+  var c=cvs(128,128),x=c.getContext('2d');x.fillStyle='#3b5a63';x.fillRect(0,0,128,128);for(var i=0;i<700;i++){x.fillStyle='rgba(255,255,255,'+(Math.random()*.06)+')';x.fillRect(Math.random()*128,Math.random()*128,2,2)}
+  var t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(2,3);
+  var fl=new THREE.Mesh(new THREE.PlaneGeometry(X1-X0,Z1-Z0),new THREE.MeshLambertMaterial({map:t}));fl.rotation.x=-Math.PI/2;fl.position.set(cx,.014,cz);scene.add(fl);
+  var cl=new THREE.Mesh(new THREE.PlaneGeometry(X1-X0,Z1-Z0),Lm(0xf1ede4));cl.rotation.x=Math.PI/2;cl.position.set(cx,H,cz);scene.add(cl);
+  /* duvarlar (batı, doğu, güney + kapı boşluğu 5.0–6.0) */
+  box(.1,H,Z1-Z0,wallM,X0-.05,H/2,cz);col(X0-.05,cz,.16,Z1-Z0);
+  box(.1,H,Z1-Z0,wallM,X1+.05,H/2,cz);col(X1+.05,cz,.16,Z1-Z0);
+  box(5.0-X0,H,.1,wallM,(X0+5.0)/2,H/2,Z1);col((X0+5.0)/2,Z1,5.0-X0,.16);
+  box(X1-6.0,H,.1,wallM,(6.0+X1)/2,H/2,Z1);col((6.0+X1)/2,Z1,X1-6.0,.16);
+  box(1.0,H-2.1,.1,wallM,5.5,2.1+(H-2.1)/2,Z1);
+  [5.0,6.0].forEach(function(dx){box(.06,2.1,.14,wood,dx,1.05,Z1)});box(1.06,.06,.14,wood,5.5,2.1,Z1);
+  /* lambri şeridi (iç yüz) */
+  box(.03,1.0,Z1-Z0,trim,X0+.015,.5,cz);box(.03,1.0,Z1-Z0,trim,X1-.015,.5,cz);box(X1-X0,1.0,.03,trim,cx,.5,Z0+.015);
+  /* tavan lambası */
+  box(.9,.04,.4,Bm(0xfff4d6),cx,H-.03,cz);var rl=new THREE.PointLight(0xffe2b0,.8,7,1.5);rl.position.set(cx,2.5,cz);scene.add(rl);
+  /* kapı üstü tabela + not */
+  placeSign(signMesh('DOKTOR DİNLENME ODASI',2.0,.42,'#1d3b5c','#ffffff',.46),5.5,2.5,Z1+.07,0);
+  var c2=cvs(256,128),k2=c2.getContext('2d');k2.fillStyle='#fff3c4';k2.fillRect(0,0,256,128);k2.fillStyle='#5b4220';k2.font='bold 22px sans-serif';k2.textAlign='center';k2.fillText('RAHATSIZ ETMEYİN',128,50);k2.font='18px sans-serif';k2.fillText('(kod mavi hariç)',128,86);
+  var nt=new THREE.Mesh(new THREE.PlaneGeometry(.38,.19),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(c2)}));nt.position.set(6.45,1.5,Z1+.07);scene.add(nt);
+  /* çalışma masası */
+  var r0=PR.mark();
+  box(1.5,.05,.7,wood,5.55,.75,-10.35);box(.04,.72,.62,dkw,4.85,.36,-10.35);box(.5,.68,.62,dkw,6.05,.36,-10.35);
+  box(.5,.32,.04,Bm(0x0b1a22),5.3,1.02,-10.45);cyl(.015,.015,.14,dk,5.3,.85,-10.45,null,6);box(.34,.015,.12,dk,5.3,.785,-10.2);cyl(.04,.035,.09,Lm(0xe8e8e2),5.65,.82,-10.2,null,10);
+  PR.slot('rest_desk',PR.grab(r0),5.55,0,-10.35,0);col(5.55,-10.35,1.5,.7);
+  /* sandalye (masaya dönük) */
+  var r1=PR.mark();box(.5,.07,.5,Lm(0x2e3a40),5.55,.48,-9.55);box(.5,.6,.08,Lm(0x2e3a40),5.55,.8,-9.3);cyl(.04,.04,.45,dk,5.55,.24,-9.55,null,8);
+  PR.slot('doctor_chair',PR.grab(r1),5.55,0,-9.55,Math.PI);
+  /* dinlenme yatağı (baş ucu kuzeyde) */
+  var r2=PR.mark();
+  box(.95,.3,2.05,Lm(0xcfd8dc),6.65,.28,-7.6);box(.9,.14,1.98,Lm(0xa5d6a7),6.65,.5,-7.6);box(.5,.09,.34,Lm(0xf4f6f6),6.65,.61,-8.4);box(.88,.1,1.1,Lm(0x6c8fb3),6.65,.6,-6.95);
+  PR.slot('rest_bed',PR.grab(r2),6.65,0,-7.6,0);col(6.65,-7.6,1.0,2.1);
+  /* soyunma dolabı (batı duvarı) */
+  var r3=PR.mark();box(.9,1.9,.5,Lm(0x607d8b),5.0,.95,-8.7);
+  PR.slot('locker',PR.grab(r3),5.0,0,-8.7,Math.PI/2);col(5.0,-8.7,.5,.9);
+  fixedTargets.push({pos:V(6.65,.9,-7.6),r:2.4,label:'Yatağa uzan',sub:'15 dakika kestir',act:function(){napGo()}})}
+function napGo(){""")
+rep("try{buildRest();nurseFem()}catch(e)", "try{buildRestRoom();nurseFem()}catch(e)")
+rep("if(Math.hypot(camera.position.x-15.9,camera.position.z+1.5)<3)a.push({pos:V(16.2,1.3,-1.5),r:2.6,label:'Doktor Dinlenme Odası',sub:'15 dakika kestir · Uyku %'+Math.round(SLEEP.v),act:napGo});",
+    "if(camera.position.x>4.6&&camera.position.x<7.3&&camera.position.z<-5.9&&camera.position.z>-10.8)a.push({pos:V(6.65,.9,-7.6),r:3,label:'Yatağa uzan',sub:'15 dakika kestir · Uyku %'+Math.round(SLEEP.v),act:napGo});")
+rep("Sağ arkadaki “Doktor Dinlenme Odası”nda 15 dakika", "Boxların yanındaki “Doktor Dinlenme Odası”nda 15 dakika")
+rep("SLEEP.v+dt*(h>24?.24:.14)", "SLEEP.v+dt*(h>24?.16:.09)")
+
 # decoUp: phong metal; moto vb. başka yuvalar sonraki adımda eklenecek
 open(dst, 'w', encoding='utf8').write(h)
 print('tamam:', dst)

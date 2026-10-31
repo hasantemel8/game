@@ -37,9 +37,21 @@
     item_tabanca:     { file: 'item_tabanca.glb',     len: 0.26, hold: true },
     item_balyoz:      { file: 'item_balyoz.glb',      len: 0.5,  hold: true },
     item_dev_siringa: { file: 'item_dev_siringa.glb', len: 0.5,  hold: true },
-    item_nester:      { file: 'item_nester.glb',      len: 0.2,  hold: true }
-    /* ek eşyalar için aynı adlandırma: item_testere, item_refleks_cekici, item_muz, item_plastik_balik,
-       item_megafon, item_lastik_ordek, item_keceli_kalem, item_sprey_boya, item_pompali, item_konfeti_bazuka */
+    item_nester:      { file: 'item_nester.glb',      len: 0.2,  hold: true },
+    item_testere:        { file: 'item_testere.glb',        len: 0.5,  hold: true },
+    item_refleks_cekici: { file: 'item_refleks_cekici.glb', len: 0.26, hold: true },
+    item_muz:            { file: 'item_muz.glb',            len: 0.24, hold: true },
+    item_plastik_balik:  { file: 'item_plastik_balik.glb',  len: 0.32, hold: true },
+    item_megafon:        { file: 'item_megafon.glb',        len: 0.3,  hold: true },
+    item_lastik_ordek:   { file: 'item_lastik_ordek.glb',   len: 0.17, hold: true },
+    item_keceli_kalem:   { file: 'item_keceli_kalem.glb',   len: 0.17, hold: true },
+    item_sprey_boya:     { file: 'item_sprey_boya.glb',     len: 0.17, hold: true },
+    item_pompali:        { file: 'item_pompali.glb',        len: 0.5,  hold: true },
+    item_konfeti_bazuka: { file: 'item_konfeti_bazuka.glb', len: 0.5,  hold: true },
+    /* dinlenme odası */
+    rest_desk: { file: 'rest_desk.glb', len: 1.5 },
+    rest_bed:  { file: 'bed.glb', len: 2.05, tint: { mattress: 0xa5d6a7 } },
+    locker:    { file: 'locker.glb', h: 1.9 }
   };
 
   var loader = new THREE.GLTFLoader();
