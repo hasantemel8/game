@@ -1,0 +1,22 @@
+<!doctype html><meta charset=utf8><body style="margin:0;background:#789"><script src="../vendor/three.min.js"></script><script src="../js/pbr.js"></script><script src="../js/characters.js"></script><script>
+var Q=new URLSearchParams(location.search),W=innerWidth,H=innerHeight;
+var r=new THREE.WebGLRenderer({antialias:true});r.setSize(W,H);document.body.appendChild(r.domElement);
+var sc=new THREE.Scene();sc.background=new THREE.Color(0x889aa6);
+var cam=new THREE.PerspectiveCamera(40,W/H,.05,50);
+sc.add(new THREE.HemisphereLight(0xffffff,0x666666,1.1));var dl=new THREE.DirectionalLight(0xffffff,1.1);dl.position.set(2,4,3);sc.add(dl);
+var fl=new THREE.Mesh(new THREE.PlaneGeometry(20,20),new THREE.MeshStandardMaterial({color:0xb8c4c4}));fl.rotation.x=-Math.PI/2;sc.add(fl);
+var looks=[{rig:1,fem:1,hairStyle:'ponytail',skin:0xe8b898,shirt:0x2fa7a0,pants:0x2fa7a0,hair:0x3b2a1f,iris:'#4a3426',badge:1},
+{rig:1,fem:1,hairStyle:'long',skin:0xe8b898,shirt:0xf4f6f6,pants:0x2f7d6a,hair:0x5b4636,iris:'#3a5a3a',badge:1},
+{rig:1,fem:1,hairStyle:'scarf',scarf:0xf2a65a,skirt:0x8e3b5f,age:48,skin:0xd9a47e,shirt:0x8e3b5f,pants:0x5a2440,hair:0x2a1a12,iris:'#3d2616'},
+{rig:1,fem:1,hairStyle:'scarf',scarf:0xe8dcc8,skin:0xc99272,shirt:0x2f8f83,pants:0x2f8f83,hair:0x5a3b2a,iris:'#4a2e1c'}];
+var P=looks.map(function(L,i){var g=ABG.rig.make(L);g.position.x=(i-1.5)*1.0;sc.add(g);return g});
+var mode=Q.get('m')||'front',T=0;ABG.S={t:0};
+function frame(dt){T+=dt;ABG.S.t=T;
+ P.forEach(function(g,i){if(mode==='walk'){ABG.rig.walk(g,1.6+i*.3,dt,ABG.S)}else{ABG.rig.relax(g,dt,false,ABG.S,cam,sc)}});
+ ABG.rig.update(dt,ABG.S,cam);
+ if(mode==='face'){cam.position.set(-1.5+ +(Q.get('i')||0),1.58,1.0);cam.lookAt(-1.5+ +(Q.get('i')||0),1.58,0)}
+ else if(mode==='side'){cam.position.set(4,1.0,0);cam.lookAt(0,.9,0);}
+ else{cam.position.set(0,1.1,4.6);cam.lookAt(0,.9,0)}
+ r.render(sc,cam)}
+window.__done=0;for(var k=0;k<40;k++){frame(.05)} window.__done=1;
+</script>

@@ -140,6 +140,47 @@ rep("if(Math.hypot(camera.position.x-15.9,camera.position.z+1.5)<3)a.push({pos:V
 rep("Sağ arkadaki “Doktor Dinlenme Odası”nda 15 dakika", "Boxların yanındaki “Doktor Dinlenme Odası”nda 15 dakika")
 rep("SLEEP.v+dt*(h>24?.24:.14)", "SLEEP.v+dt*(h>24?.16:.09)")
 
+
+# --- 9) kemikli karakterler (js/characters.js): hemşire, Ece, Zozan Abla, temizlikçi, birinci şahıs kollar ---
+rep('<script src="js/pbr.js"></script>', '<script src="js/pbr.js"></script>\n<script src="js/characters.js"></script>')
+rep("function makePerson(L){\n  if(L.bird)return makeBird();",
+    "function makePerson(L){\n  if(L.bird)return makeBird();\n  if(L.rig&&window.ABG&&ABG.rig&&ABG.rig.on&&new URLSearchParams(location.search).get('rig')!=='0'){try{return ABG.rig.make(L)}catch(e){console.warn('rig hata, eski model:',e)}}")
+rep("function sitPose(g,sit){", "function sitPose(g,sit){if(g.userData.rig){ABG.rig.sit(g,sit);return}")
+rep("function walkAnim(g,sp,dt){var u=g.userData;if(!u||!u.L)return;", "function walkAnim(g,sp,dt){var u=g.userData;if(!u||!u.L)return;if(u.rig){ABG.rig.walk(g,sp,dt,S);return}")
+rep("function relax(g,dt,look){var u=g.userData;if(!u||!u.L)return;", "function relax(g,dt,look){var u=g.userData;if(!u||!u.L)return;if(u.rig){ABG.rig.relax(g,dt,look,S,camera,scene);return}")
+rep("function relaxAll(dt){", "function relaxAll(dt){if(window.ABG&&ABG.rig){ABG.rig.update(dt,S,camera);ABG.rig.updateArms(dt,S.item>0,S.t)}")
+# hemşire
+rep("var nurse=makePerson(LOOKS.hemsire);", "var nurse=makePerson(Object.assign({rig:1,fem:1,hairStyle:'ponytail',hair:0x3b2a1f,iris:'#4a3426',badge:1},LOOKS.hemsire));")
+# Ece
+rep("var g=makePerson(L);var nb=box(.16,.2,.03,Lm(0x3a6fd8),.0,.0,0,g);nb.position.set(.28,.95,.22);",
+    "L.rig=1;L.fem=1;L.hairStyle='bun';L.badge=1;L.iris='#3a5a3a';var g=makePerson(L);if(!g.userData.rig){var nb=box(.16,.2,.03,Lm(0x3a6fd8),.0,.0,0,g);nb.position.set(.28,.95,.22)}")
+# temizlikçi (Gülsüm)
+rep("function buildCleaner(){var g=makePerson({skin:0xc99272,shirt:0x2f8f83,pants:0x2f8f83,hair:0x5a3b2a});",
+    "function buildCleaner(){var g=makePerson({rig:1,fem:1,hairStyle:'scarf',scarf:0xe8dcc8,skin:0xc99272,shirt:0x2f8f83,pants:0x2f8f83,hair:0x5a3b2a,iris:'#4a2e1c'});")
+# Zozan Abla
+rep("var g=makePerson({skin:0xd9a47e,shirt:0x8e3b5f,pants:0x5a2440,hair:0x2a1a12,extra:'dress'});\n  g.traverse(",
+    "var g=makePerson({rig:1,fem:1,hairStyle:'scarf',scarf:0xf2a65a,skirt:0x8e3b5f,skin:0xd9a47e,shirt:0x8e3b5f,pants:0x5a2440,hair:0x2a1a12,iris:'#3d2616',age:48});\n  if(g.userData.rig){g.userData.up=new THREE.Group()}\n  g.traverse(")
+# kollar
+rep("armR.position.set(.33,-.34,-.38);armR.rotation.set(.25,.25,0);camera.add(armR);",
+    "armR.position.set(.33,-.34,-.38);armR.rotation.set(.25,.25,0);camera.add(armR);try{ABG.rig.makeArm(armR,0xe0ac84,0xf4f6f6,1)}catch(e){console.warn('kol hata',e)}")
+rep("armL.position.set(-.33,-.36,-.38);armL.rotation.set(.2,-.25,0);camera.add(armL);",
+    "armL.position.set(-.33,-.36,-.38);armL.rotation.set(.2,-.25,0);camera.add(armL);try{ABG.rig.makeArm(armL,0xe0ac84,0xf4f6f6,-1)}catch(e){console.warn('kol hata',e)}")
+# konuşma / çığlık
+rep("function subtitle(who,line){var el=$('#subs');if(!el)return;",
+    "function subtitle(who,line){try{var tg={ece:ECEW.g,husnu:HUS.g,gulsum:CLN.g,nermin:S.nurse}[who];if(tg&&window.ABG&&ABG.rig){ABG.rig.talk(tg,Math.min(6,line.length*.07));ABG.rig.express(tg,who==='ece'?'smile':'neutral',3)}}catch(e){}var el=$('#subs');if(!el)return;")
+rep("ECEL.scrT=14;try{subtitle('ece',line)}catch(e){}", "ECEL.scrT=14;try{subtitle('ece',line);ABG.rig.express(E.g,'surprised',3)}catch(e){}")
+
+
+# --- 9b) sonradan yeniden tanımlanan femStaff katmanı: kemikli karakterleri bozmasın ---
+rep("var g=makePerson(LL);femExtra(g,opt||{});return g}", "var g=makePerson(LL);if(!g.userData.rig)femExtra(g,opt||{});return g}")
+rep("function nurseFem(){var n=S.nurse;if(!n||n.userData.fem)return;", "function nurseFem(){var n=S.nurse;if(!n||n.userData.fem||n.userData.rig)return;")
+rep("var g=femStaff(L,'long',24,{hairCol:0x5b4636,long:1});var nb=box(.16,.2,.03,Lm(0x3a6fd8),.0,.0,0,g);nb.position.set(.28,.95,.22);\n  var bn=box(.13,.07,.01,Bm(0xffffff),0,0,0,g);bn.position.set(-.1,1.33,.155);",
+    "var g=femStaff(Object.assign(L,{rig:1,fem:1,hairStyle:'long',badge:1,iris:'#3a5a3a'}),'long',24,{hairCol:0x5b4636,long:1});if(!g.userData.rig){var nb=box(.16,.2,.03,Lm(0x3a6fd8),.0,.0,0,g);nb.position.set(.28,.95,.22);\n  var bn=box(.13,.07,.01,Bm(0xffffff),0,0,0,g);bn.position.set(-.1,1.33,.155)}")
+rep("var g=femStaff({skin:0xd9a47e,shirt:0x8e3b5f,pants:0x5a2440,hair:0x2a1a12,extra:'dress'},'bun',48,",
+    "var g=femStaff({rig:1,fem:1,hairStyle:'scarf',scarf:0xf2a65a,skirt:0x8e3b5f,age:48,iris:'#3d2616',skin:0xd9a47e,shirt:0x8e3b5f,pants:0x5a2440,hair:0x2a1a12,extra:'dress'},'bun',48,")
+rep("var up=g.userData.up;if(up){var sc=sph(.215,Lm(0xf2a65a),0,.9,-.03,up);sc.scale.set(1.02,.8,1.04)", "var up=g.userData.up;if(up&&!g.userData.rig){var sc=sph(.215,Lm(0xf2a65a),0,.9,-.03,up);sc.scale.set(1.02,.8,1.04)")
+rep("buildCleaner=function(){var g=femStaff({skin:0xc99272,", "buildCleaner=function(){var g=femStaff({rig:1,fem:1,hairStyle:'scarf',scarf:0xe8dcc8,iris:'#4a2e1c',skin:0xc99272,")
+
 # decoUp: phong metal; moto vb. başka yuvalar sonraki adımda eklenecek
 open(dst, 'w', encoding='utf8').write(h)
 print('tamam:', dst)

@@ -38,6 +38,7 @@
   function Mesh() { this.pos = []; this.rgb = []; this.si = []; this.sw = []; this.idx = []; }
   /* tek bir halka ekle. c: merkez [x,y,z], u,v: halka düzleminin birim eksenleri, a,b: yarıçaplar */
   Mesh.prototype.ring = function (c, u, v, a, b, color, w) {
+    if (typeof w === 'function') w = w(0);
     var base = this.pos.length / 3, i, t, ca, sa;
     for (i = 0; i < NS; i++) {
       t = i / NS * Math.PI * 2; ca = Math.cos(t) * a; sa = Math.sin(t) * b;
@@ -98,7 +99,11 @@
   function bodyMesh(L) {
     var M = new Mesh(), fem = !!L.fem, skin = col(L.skin), skinS = col(shade(L.skin, .93)), shirt = col(L.shirt), pants = col(L.pants);
     var shoe = col(L.shoe || 0xf2f2f0), lowerArmSkin = !L.longSleeve;
-    var wTorso = chainW([[B.pelvis, 9], [B.spine1, 1.05], [B.spine2, 1.25], [B.neck, 1.45]], [.08, .08, .05]);
+    var wTorso = function (y) {
+      var a = sstep(.95, 1.12, y), b = sstep(1.2, 1.34, y), c = sstep(1.40, 1.48, y), o = [];
+      o.push([B.pelvis, 1 - a]); o.push([B.spine1, a * (1 - b)]); o.push([B.spine2, b * (1 - c)]); o.push([B.neck, c]);
+      return o.filter(function (q) { return q[1] > .002; });
+    };
     function sw(sx) {                       /* sx=+1 sol (+x), -1 sağ */
       var s = sx > 0;
       return {
@@ -129,13 +134,13 @@
       var W = sw(sx), x = .205 * sx, shortSl = !L.longSleeve;
       var sleeve = shirt, cuffY = shortSl ? 1.20 : .90;
       var A = [
-        [1.44, x * .97, 0, .050, .052, sleeve, W.arm], [1.36, x, 0, .052, .052, sleeve, W.arm],
+        [1.415, x * .94, 0, .040, .042, sleeve, W.arm], [1.375, x, 0, .053, .053, sleeve, W.arm],
         [1.26, x, 0, .046, .046, sleeve, W.arm],
         [cuffY, x, 0, .042, .043, sleeve, W.arm], [cuffY, x, 0, .040, .041, skin, W.arm],
         [1.09, x, 0, .036, .038, skin, W.arm], [1.00, x, 0, .037, .040, skin, W.arm],
         [.90, x, 0, .029, .031, skin, W.arm], [.84, x, 0, .026, .030, skin, W.arm]];
       if (!shortSl) { A[3][5] = sleeve; A[4][5] = sleeve; A[5][5] = sleeve; A[6][5] = sleeve; A[7][5] = sleeve; A[8] = [.84, x, 0, .028, .032, sleeve, W.arm]; A.push([.82, x, 0, .026, .030, skin, W.arm]); }
-      M.vloft(A, false, false);
+      M.vloft(A, true, false);
       /* el: avuç + parmaklar tek yassı yapı */
       var hb = sx > 0 ? B.wrL : B.wrR;
       M.vloft([[.84, x, 0, .028, .026, skin, fixW(hb)], [.80, x, .002, .036, .018, skin, fixW(hb)], [.75, x, .004, .038, .016, skin, fixW(hb)], [.70, x, .006, .034, .013, skin, fixW(hb)], [.665, x, .006, .026, .010, skin, fixW(hb)], [.655, x, .006, .01, .006, skin, fixW(hb)]], false, true);
@@ -177,7 +182,7 @@
     return [(az + FP.phi) / (2 * FP.phi), (th - FP.t0) / (FP.t1 - FP.t0), HR[0] * sn, HR[1] * sn];
   }
   function headDeform(v) {                                           /* çene inceltme; elipsoid yüzeyine uygulanır */
-    var ny = (v.y - HC[1]) / HR[1];
+    var ny = v.y / HR[1];
     if (ny < 0) { var k = 1 - .30 * Math.pow(-ny, 1.7); v.x *= k; v.z *= (1 - .20 * Math.pow(-ny, 1.7)); v.z += .012 * Math.pow(-ny, 2); }
     return v;
   }
@@ -265,9 +270,9 @@
     if (st === 'bald') return grp;
     if (st === 'scarf') {
       var sm = mats.scarf;
-      var cap = ellipsoid(HR[0] * 1.12, HR[1] * 1.10, HR[2] * 1.14, 0, Math.PI * 2, 0, 1.72, sm, cy + .004); cap.position.z = -.004; grp.add(cap);
+      var cap = ellipsoid(HR[0] * 1.12, HR[1] * 1.10, HR[2] * 1.14, 0, Math.PI * 2, 0, 1.28, sm, cy + .004); cap.position.z = -.004; grp.add(cap);
       var back = ellipsoid(HR[0] * 1.14, HR[1] * 1.12, HR[2] * 1.16, Math.PI / 2 + .98, Math.PI * 2 - 1.96, 0, 2.55, sm, cy - .01); back.position.z = -.012; grp.add(back);
-      var drape = new THREE.Mesh(new THREE.CylinderGeometry(.115, .20, .22, 18, 1, true, Math.PI * .08, Math.PI * 1.84), sm); drape.position.set(0, -.07, -.04); drape.material.side = THREE.DoubleSide; grp.add(drape);
+      var drape = new THREE.Mesh(new THREE.CylinderGeometry(.115, .20, .22, 18, 1, true, Math.PI * .30, Math.PI * 1.40), sm); drape.position.set(0, -.07, -.045); drape.material.side = THREE.DoubleSide; grp.add(drape);
       return grp;
     }
     var top = ellipsoid(HR[0] * 1.045, HR[1] * 1.04, HR[2] * 1.06, 0, Math.PI * 2, 0, st === 'short' ? 1.12 : 1.08, m, cy + .002); top.position.z = -.002; grp.add(top);
@@ -315,8 +320,12 @@
     var fm = new THREE.MeshStandardMaterial({ map: tex, transparent: true, depthWrite: false, roughness: .72, metalness: 0, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2, envMapIntensity: ABG.envI || .25 });
     var fmesh = new THREE.Mesh(fg, fm); head.add(fmesh);
     /* burun + kulaklar */
-    var nose = ellipsoid(.017, .024, .022, 0, 6.3, 0, 3.15, hm, 0); nose.position.set(0, 1.585 - 1.53, .104); nose.rotation.x = .35; head.add(nose);
+    var nose = ellipsoid(.011, .016, .016, 0, 6.3, 0, 3.15, hm, 0); nose.position.set(0, 1.583 - 1.53, .106); nose.rotation.x = .35; head.add(nose);
     [-1, 1].forEach(function (s) { var ear = ellipsoid(.008, .026, .018, 0, 6.3, 0, 3.15, hm, 0); ear.position.set(s * .098, 1.62 - 1.53, 0); ear.rotation.z = s * .15; head.add(ear); });
+    if (L.skirt) {
+      var sk = new THREE.Mesh(new THREE.CylinderGeometry(.17, .30, .60, 22, 1, true), new THREE.MeshStandardMaterial({ color: col(L.skirt), roughness: .85, metalness: 0, side: THREE.DoubleSide }));
+      sk.position.y = -.31; sk.castShadow = true; bones[B.pelvis].add(sk);
+    }
     var mats = { hair: new THREE.MeshStandardMaterial({ color: col(L.hair), roughness: .55, metalness: 0, envMapIntensity: ABG.envI || .25 }), scarf: new THREE.MeshStandardMaterial({ color: col(L.scarf || 0x7e57c2), roughness: .8, metalness: 0 }) };
     var hairGrp = addHair(head, L, mats);
     /* yan donanım: rozet, cep vb. omurgaya */
@@ -350,12 +359,12 @@
   function ease(cur, tgt, k) { return cur + (tgt - cur) * k; }
   var PI = Math.PI;
 
-  R.walk = function (g, sp, dt) {
+  R.walk = function (g, sp, dt, S) {
     var u = g.userData, r = u.rig; if (!r) return false;
     if (r.sit) return true;
     var b = r.b, run = clamp((sp - 2.2) / 2.2, 0, 1);
     var f = clamp(.42 * sp + .32, .6, 2.5), k = Math.min(1, dt * 16);
-    r.ph += PI * 2 * f * dt; r.w = Math.min(1, r.w + dt * 5); u.mv = ABG.S ? ABG.S.t : 0;
+    r.ph += PI * 2 * f * dt; r.w = Math.min(1, r.w + dt * 5); u.mv = S ? S.t : 0;
     var A = clamp(.26 + .075 * sp, .3, .78), φ = r.ph, ph2 = φ + PI;
     function leg(hip, kn, an, p) {
       var th = A * Math.sin(p);                                        /* uyluk öne (+) */
@@ -392,7 +401,7 @@
   R.sit = function (g, sit) {
     var r = g.userData.rig; if (!r) return false; var b = r.b; r.sit = !!sit;
     if (sit) {
-      restPose(r); b[B.pelvis].position.y = .53; b[B.hipL].rotation.x = b[B.hipR].rotation.x = -1.50; b[B.knL].rotation.x = b[B.knR].rotation.x = 1.52;
+      restPose(r); b[B.pelvis].position.y = .52; b[B.hipL].rotation.x = b[B.hipR].rotation.x = -1.50; b[B.knL].rotation.x = b[B.knR].rotation.x = 1.52;
       b[B.hipL].rotation.z = .05; b[B.hipR].rotation.z = -.05; b[B.spine1].rotation.x = -.06; b[B.shL].rotation.x = b[B.shR].rotation.x = -.45;
       b[B.elL].rotation.x = b[B.elR].rotation.x = -1.05; b[B.anL].rotation.x = b[B.anR].rotation.x = .0;
     } else { restPose(r); }
@@ -400,10 +409,10 @@
   };
 
   var _tv = new THREE.Vector3();
-  R.relax = function (g, dt, look) {
+  R.relax = function (g, dt, look, S, cam, scene) {
     var u = g.userData, r = u.rig; if (!r) return false;
-    var b = r.b, S = ABG.S, cam = ABG.camera, t = S ? S.t : 0, e = Math.min(1, dt * 9);
-    u.sh.visible = g.parent === ABG.scene && Math.abs(g.rotation.x) < .1;
+    var b = r.b, t = S ? S.t : 0, e = Math.min(1, dt * 9);
+    u.sh.visible = g.parent === scene && Math.abs(g.rotation.x) < .1;
     var breath = Math.sin(t * 1.7 + r.seed), still = !S || (t - u.mv > .12);
     if (!still) return true;
     r.w = Math.max(0, r.w - dt * 4);
@@ -436,8 +445,7 @@
   /* ===================== yüz güncellemesi ===================== */
   R.express = function (g, name, dur) { var r = g && g.userData && g.userData.rig; if (!r) return; r.face.expr = name; r.face.exprT = dur || 2; };
   R.talk = function (g, dur) { var r = g && g.userData && g.userData.rig; if (!r) return; r.face.talk = Math.max(r.face.talk, dur || 2); };
-  R.update = function (dt) {
-    var S = ABG.S, cam = ABG.camera;
+  R.update = function (dt, S, cam) {
     for (var i = R.list.length - 1; i >= 0; i--) {
       var g = R.list[i]; if (!g.parent && !g.userData.keepFace) continue;
       var r = g.userData.rig, f = r.face;
@@ -455,19 +463,17 @@
 
   /* ===================== birinci şahıs kollar ve eller ===================== */
   /* parent: kamera altındaki kol grubu (öne doğru -Z). Eski kutu/küre kol parçalarını gizler, yerine kemikli kol+el koyar. */
-  R.makeArms = function (parents, skinHex, sleeveHex) {
-    var out = [];
-    parents.forEach(function (par, idx) {
-      var sx = idx === 0 ? 1 : -1;                                     /* 0: sağ kol (+x'te görünür), 1: sol */
+  R.makeArm = function (par, skinHex, sleeveHex, sx) {
+    {                                     /* 0: sağ kol (+x'te görünür), 1: sol */
       var sleeve = col(sleeveHex), skin = col(skinHex), skinD = col(shade(skinHex, .9));
       var M = new Mesh(), bones = [], nm = ['fore', 'wrist', 'f1', 'f2', 'f3', 't1', 't2'], i;
-      var pos = [[0, 0, .55], [0, 0, -.06], [0, 0, -.2], [0, 0, -.245], [0, 0, -.285], [-.036 * sx, -.004, -.14], [-.046 * sx, -.006, -.18]];
+      var pos = [[0, 0, .30], [0, 0, -.06], [0, 0, -.2], [0, 0, -.245], [0, 0, -.285], [-.036 * sx, -.004, -.14], [-.046 * sx, -.006, -.18]];
       var par_ = [-1, 0, 1, 2, 3, 1, 5];
       for (i = 0; i < 7; i++) { var bn = new THREE.Bone(); bn.name = nm[i]; bones.push(bn); }
       for (i = 0; i < 7; i++) { var q = par_[i]; if (q < 0) bones[i].position.set(pos[i][0], pos[i][1], pos[i][2]); else { bones[i].position.set(pos[i][0] - pos[q][0], pos[i][1] - pos[q][1], pos[i][2] - pos[q][2]); bones[q].add(bones[i]); } }
       var wfore = function (z) { return z > -.03 ? [[0, 1]] : z > -.09 ? [[0, 1 - sstep(-.03, -.09, z)], [1, sstep(-.03, -.09, z)]] : [[1, 1]]; };
       /* z boyunca halkalar (XY düzleminde): [z, cx, cy, rx, ry, renk, w] */
-      var F = [[.62, 0, 0, .058, .056, sleeve], [.45, 0, 0, .052, .050, sleeve], [.20, 0, 0, .046, .045, sleeve], [-.02, 0, 0, .042, .042, sleeve], [-.02, 0, 0, .031, .030, skin], [-.07, 0, 0, .027, .025, skin]];
+      var F = [[.30, 0, 0, .056, .054, sleeve], [.20, 0, 0, .050, .048, sleeve], [.10, 0, 0, .046, .045, sleeve], [-.02, 0, 0, .042, .042, sleeve], [-.02, 0, 0, .031, .030, skin], [-.07, 0, 0, .027, .025, skin]];
       var prev = -1, first = -1;
       F.forEach(function (s) { var r = M.ring([s[1], s[2], s[0]], UX, UY, s[3], s[4], s[5], wfore(s[0])); if (prev >= 0) M.join(prev, r, true); else first = r; prev = r; });
       M.cap(first, false);
@@ -489,9 +495,8 @@
       mesh.bind(new THREE.Skeleton(bones)); mesh.frustumCulled = false; mesh.renderOrder = 3;
       /* eski kol parçalarını gizle (Mesh, grup dışı çocuklar) */
       par.children.forEach(function (c) { if (c !== mesh && c.isMesh) c.visible = false; });
-      out.push({ mesh: mesh, bones: bones, curl: .25, par: par, sx: sx });
-    });
-    R.arms = out; return out;
+      (R.arms = R.arms || []).push({ mesh: mesh, bones: bones, curl: .25, par: par, sx: sx });
+    }
   };
   R.updateArms = function (dt, grip, t) {
     if (!R.arms) return;
