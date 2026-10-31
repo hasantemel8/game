@@ -192,7 +192,7 @@ rep("  floorText('DOKTOR',2.1,.55,'#b0306f',8.6,-.7,0);\n", "")
 
 # --- 11) hazır (CC-BY) insan modelleri: erkek yetişkin hastalara varyasyon olarak ---
 rep("function makePatient(enc,lookKey){var p={n:++S.pn,enc:enc,age:(enc.age>10&&!enc.vk)?enc.age+Math.round(rnd(-3,3)):enc.age,g:makePerson(withFace(randLook(lookKey||enc.look),enc)),",
-    "function pickVar(L,enc){try{var R=ABG.rig;if(!R||!R.vready||L.bird||L.extra||(enc.sex!=='Erkek'&&enc.sex!=='Kadın')||enc.age<20||enc.age>68||Math.random()>.45)return L;var n=0;P.forEach(function(q){if(q.g&&q.g.userData.rig&&q.g.userData.rig.variant)n++});if(n>=(MOB?3:7))return L;var vk=R.vpick(enc.sex==='Kadın');if(!vk)return L;L.rig=1;L.variant=vk}catch(e){}return L}\nfunction makePatient(enc,lookKey){var p={n:++S.pn,enc:enc,age:(enc.age>10&&!enc.vk)?enc.age+Math.round(rnd(-3,3)):enc.age,g:makePerson(pickVar(withFace(randLook(lookKey||enc.look),enc),enc)),")
+    "function pickVar(L,enc){try{var R=ABG.rig;if(!R||L.bird||L.extra)return L;var f=enc.sex==='Kadın';if(R.vready&&(enc.sex==='Erkek'||f)&&enc.age>=20&&enc.age<=68&&Math.random()<.45){var n=0;P.forEach(function(q){if(q.g&&q.g.userData.rig&&q.g.userData.rig.variant)n++});if(n<(MOB?3:7)){var vk=R.vpick(f);if(vk){L.rig=1;L.variant=vk;return L}}}L.rig=1;L.fem=f?1:0;L.age=enc.age;if(f)L.hairStyle=enc.age>62?'bun':pick(['ponytail','bun','long','long','scarf']);else{L.hairStyle=(enc.age>58&&Math.random()<.5)?'bald':'short';if(enc.age>24&&Math.random()<.22)L.stache=1}if(enc.age<=12&&!L.scale)L.scale=.62}catch(e){}return L}\nfunction makePatient(enc,lookKey){var p={n:++S.pn,enc:enc,age:(enc.age>10&&!enc.vk)?enc.age+Math.round(rnd(-3,3)):enc.age,g:makePerson(pickVar(withFace(randLook(lookKey||enc.look),enc),enc)),")
 
 
 # --- 12) POV kolları referansa göre: daha yukarı, daha büyük, ağzı görünür ---
@@ -201,6 +201,56 @@ rep("armL.position.set(-.33,-.36,-.38);armL.rotation.set(.2,-.25,0);", "armL.pos
 rep("S.armR.rotation.x=.25+S.swing*", "S.armR.rotation.x=.42+S.swing*")
 rep("S.armR.position.y=-.34+(", "S.armR.position.y=-.26+(")
 rep("S.armL.position.y=-.36+(", "S.armL.position.y=-.28+(")
+
+
+# --- 13) hazır modelli (rig) kadın hastalara eski küre/ruj eklentisi uygulanmasın; hazır kadın modeller biraz uzun ---
+rep("if(/^k/i.test(sx)&&a>=16&&p.g&&p.g.userData.up&&!p.g.userData.bird){femExtra(",
+    "if(/^k/i.test(sx)&&a>=16&&p.g&&p.g.userData.up&&!p.g.userData.bird&&!p.g.userData.rig){femExtra(")
+
+
+# --- 14) pembe "Doktor Odası" alanı kaldırıldı; telefon dinlenme odasındaki masaya taşındı; tabela yazısı sığar ---
+rep(" {n:'Doktor Odası',h:'konsültasyon',x0:6.2,x1:11,z0:-3.8,z1:0,f:0xffc6e0,b:0xd94f95},\n", "")
+rep("  route(0xd94f95,[[8.6,1.6],[8.6,.4]]);                                       /* Doktor odası */\n", "")
+rep("g.position.set(9.05,1.12,-2.05);scene.add(g);", "g.position.set(5.95,.81,-10.3);g.rotation.y=Math.PI;scene.add(g);")
+rep("fixedTargets.push({pos:V(9.05,1.15,-2.05),r:2.4,label:'Uzmanı ara (Dr. Selim)'", "fixedTargets.push({pos:V(5.95,1.0,-10.3),r:2.6,label:'Uzmanı ara (Dr. Selim)'")
+rep("x.fillText(text,c.width/2,c.height/2+3);var t=new THREE.CanvasTexture(c);return new THREE.Mesh(new THREE.PlaneGeometry(w,h)", "x.fillText(text,c.width/2,c.height/2+3,c.width-40);var t=new THREE.CanvasTexture(c);return new THREE.Mesh(new THREE.PlaneGeometry(w,h)")
+rep("placeSign(signMesh('DOKTOR DİNLENME ODASI',2.0,.42,'#1d3b5c','#ffffff',.46),5.5,2.5,Z1+.07,0);", "placeSign(signMesh('DOKTOR DİNLENME ODASI',2.4,.44,'#1d3b5c','#ffffff',.4),5.5,2.5,Z1+.07,0);")
+
+
+# --- 15) KPR: kesintisiz bası + ~5 sn'de bir ventilasyon; "hayatını kurtardın" ifadesi ---
+_js = "/* ---------- KPR: kesintisiz bası + ~5 sn'de bir ventilasyon ---------- */\nvar CPRN={dur:32,t:0,vt:5,win:0,vOk:0,vTot:0,h:null,ventDone:false};\ncprUI=function(msg){var rem=Math.max(0,Math.ceil(CPRN.dur-CPRN.t));$('#cprCnt').textContent=CB.count+' bası · hava '+CPRN.vOk+'/'+CPRN.vTot;$('#cprCyc').textContent=CB.phase==='vent'?('HAVA VER! '+Math.ceil(CPRN.win)+' sn'):('sonraki hava ~'+Math.ceil(CPRN.vt)+' sn · kalan '+rem+' sn');if(msg!==undefined)$('#cprMsg').textContent=msg;$('#cprV').disabled=CB.phase!=='vent';$('#cprC').disabled=false;var bx=$('#ambuBox');if(bx)bx.hidden=CB.phase!=='vent';$('#cpr').classList.toggle('ventnow',CB.phase==='vent');if(CB.phase!=='vent'){AMBU.sq=0;AMBU.down=false;ambuSet()}};\nfunction cprTick(){if(CB.state!=='cpr'){clearInterval(CPRN.h);return}CPRN.t+=.1;\n  if(CB.phase==='vent'){CPRN.win-=.1;if(CPRN.win<=0){CB.phase='comp';CPRN.vt=5;cprUI('Havayı kaçırdın! Basıyı sürdür, sıradaki havayı yakala.')}}\n  else{CPRN.vt-=.1;if(CPRN.vt<=0){CB.phase='vent';CPRN.win=3;CPRN.vTot++;CPRN.ventDone=false;try{tone(660,.12,'sine',.05)}catch(e){}cprUI('HAVA VER! V tuşu ya da ambuyu sık; basıyı bırakma.')}}\n  if(CPRN.t>=CPRN.dur){clearInterval(CPRN.h);var rc=CB.total?CB.good/CB.total:0,vc=CPRN.vTot?CPRN.vOk/CPRN.vTot:1,acc=.7*rc+.3*vc;show('#cpr',false);S.mode='play';lock();CB.phase='comp';cbOutcome(acc>=.55,null,acc);return}\n  cprUI()}\ncprStart=function(){if(CB.state!=='alarm')return;CB.state='cpr';CB.phase='comp';CB.count=0;CB.vent=0;CB.cycle=0;CB.good=0;CB.total=0;CB.last=0;CB.ints=[];S.mode='cpr';unlock();var el=$('#cbBox');if(el)el.hidden=true;show('#cpr',true);CPRN.t=0;CPRN.vt=5;CPRN.win=0;CPRN.vOk=0;CPRN.vTot=0;CPRN.ventDone=false;clearInterval(CPRN.h);CPRN.h=setInterval(cprTick,100);cprUI('Kesintisiz bas (Boşluk / BAS). Yaklaşık 5 saniyede bir “HAVA VER” çıkar: V ya da ambu.')};\ncprPress=function(){if(CB.state!=='cpr')return;var now=performance.now();try{tone(90,.09,'sine',.09);sfxNoise(.06,700,1,.05)}catch(e){}var hz=$('#cprHeart');if(hz){hz.classList.remove('b');void hz.offsetWidth;hz.classList.add('b')}\n  if(CB.last){var iv=now-CB.last;if(iv<2000){CB.ints.push(iv);if(CB.ints.length>4)CB.ints.shift();var rate=Math.round(60000/iv),avg=Math.round(60000/(CB.ints.reduce(function(a,b){return a+b},0)/CB.ints.length));CB.total++;var ok=rate>=100&&rate<=120;if(ok)CB.good++;\n    $('#cprRate').textContent=Math.min(avg,240);$('#cprRate').className=avg>=100&&avg<=120?'ok':'no';$('#cprNeedle').style.left=clamp((avg-60)/(160-60)*100,0,100)+'%';if(CB.phase!=='vent')cprUI(ok?'İyi ritim! Göğsün tam geri gelmesine izin ver.':rate<100?'Çok yavaş! Daha hızlı bas.':'Çok hızlı! Biraz yavaşla, derinlik 5–6 cm olmalı.')}}\n  CB.last=now;CB.count++;cprUI()};\ncprVent=function(){if(CB.state!=='cpr'||CB.phase!=='vent'||CPRN.ventDone)return;CPRN.ventDone=true;CPRN.vOk++;CB.vent++;try{sfxNoise(.7,500,.5,.07,'lowpass')}catch(e){}CB.phase='comp';CPRN.vt=5;cprUI('Hava verildi ✔ Basıya devam, ritmi bozma.')};\n\n"
+rep("/* ---------- 6) KIRMIZI ALAN: yaratıcı vakalar + mini oyunlar ---------- */", _js + "/* ---------- 6) KIRMIZI ALAN: yaratıcı vakalar + mini oyunlar ---------- */")
+h = h.replace("30:2", "her ~5 sn’de bir ventilasyon")
+rep('<div class="ls-t">HAYATA DÖNDÜ</div>', '<div class="ls-t">HAYATINI KURTARDIN</div>')
+rep("' hayata döndü, ekip ayakta alkışladı')", "' hastanın hayatını kurtardı, ekip ayakta alkışladı')")
+rep("snap('Hayata döndü: '+", "snap('Hayatını kurtardın: '+")
+rep("bigPop('💓','ROSC!','Nabız geri geldi'+pct+'. Ekip seni alkışladı; Nihal Hanım bile gülümsedi.','good');", "bigPop('💓','HAYATINI KURTARDIN!','Nabız geri geldi'+pct+'. Hastanın hayatını kurtardın; ekip alkışladı, Nihal Hanım bile gülümsedi.','good');try{lifeSaved(p)}catch(e){}")
+rep('<span id="cprCnt">0 / 30 bası</span><span id="cprCyc">Döngü 1 / 2</span>', '<span id="cprCnt">0 bası</span><span id="cprCyc">—</span>')
+
+
+# --- 16) bilgisayarlar (triyaj x2, yeşil alan EKG/BT) + personel gezintisi ---
+_pcjs = open(__import__('os').path.join(__import__('os').path.dirname(__import__('os').path.abspath(__file__)), 'pc.js'), encoding='utf8').read()
+_pcov = '<div id="pcz" class="overlay" hidden><div class="panel" style="width:min(940px,100%);display:grid;gap:10px"><h2 id="pczT"></h2><div id="pczG" style="display:grid;gap:10px"><canvas id="pczE" width="640" height="380" style="width:100%;border-radius:8px;cursor:zoom-in;background:#04100c"></canvas><canvas id="pczC" width="420" height="380" style="width:100%;border-radius:8px;cursor:zoom-in;background:#000"></canvas></div><label style="display:grid;gap:4px;font-size:13px">BT görüntüsü<input id="pczS" type="range" min="1" max="20" value="10"></label><p id="pczI" style="font-size:13px;white-space:pre-wrap;max-height:22vh;overflow:auto"></p><p id="pczH" style="font-size:12px;opacity:.7"></p><div class="cprbtns"><button id="pczX" class="big" type="button">Kapat <kbd>Esc</kbd></button></div></div></div>\n\n  '
+rep('<div id="mg" class="overlay" hidden>', _pcov + '<div id="mg" class="overlay" hidden>')
+rep("/* ---------- 6) KIRMIZI ALAN: yaratıcı vakalar + mini oyunlar ---------- */", _pcjs + "/* ---------- 6) KIRMIZI ALAN: yaratıcı vakalar + mini oyunlar ---------- */")
+rep("box(.32,.22,.04,Bm(0x0b1a22),POLI.desk.x+.15,.9,POLI.desk.z-.45).rotation.y=-Math.PI/2;box(.04,.06,.04,legM,POLI.desk.x+.17,.79,POLI.desk.z-.45);", "")
+rep("box(.5,.35,.05,Bm(0x07202a),5.2,1.5,4.4);box(.1,.3,.1,legM,5.2,1.28,4.4);", "")
+rep("E.st='sit';E.t=rnd(18,34);", "E.st='sit';E.t=rnd(6,12);", 2)
+rep("ECEW.st='sit';ECEW.t=rnd(10,20);", "ECEW.st='sit';ECEW.t=rnd(4,8);")
+rep("shuffle(ECEL.pts.slice()).slice(0,2)", "shuffle(ECEL.pts.slice()).slice(0,3)", 2)
+
+rep('<script src="js/characters.js"></script>', '<script src="js/characters.js"></script>\n<script src="js/medimg.js"></script>')
+
+
+# --- 17) vardiya sonu hasta yorumları: daha orijinal/komik, şikâyete özel ---
+_rv = r"""RVT={5:['“Doktor bey o kadar ilgiliydi ki ağrım utanıp kendiliğinden geçti.”','“Ambulans şoförü bile alkışladı. Bence bu bir rekor.”','“Hemşire hanım ‘geçmiş olsun’ derken anneannem gibiydi. Üç kere daha hasta olabilirim.”','“Çay yok ama doktor var. Dünyanın en güzel takası.”','“Kapıdan ‘bir şeyim yok’ diye girdim, ‘iyi ki gelmişim’ diye çıktım.”','“Otomatta tost bitmişti, doktor kendi tostundan verdi. Evlenme teklif edeceğim.”','“Acilde bu kadar ciddiye alınmak… Ben bile kendimi ciddiye almıyorum.”'],4:['“Çok iyi baktılar, sadece sedye biraz ‘vintage’ydi.”','“Doktor harikaydı; bekleme salonundaki televizyon hâlâ 2009 haberlerini veriyor.”','“4 yıldız, çünkü 5 verirsem tekrar çağırırlar.”','“Şifa verdiler, fatura vermediler. Sağ olsunlar.”','“Hemşire hanım çok güzel gülümsedi, ağrım geçti, tansiyonum çıktı.”','“Güzel baktılar ama sandalyeler sert. Belki de acil olmasın diye.”'],3:['“Ne iyiydi ne kötü. Tam bir pazartesi sabahı gibi.”','“Beklerken kendi kendime tanı koydum, doktor aynısını söyledi. Gururlandım.”','“Bir saat bekledim, iki dakika baktılar. Ama o iki dakika kaliteliydi.”','“Tuvaleti bulmak muayeneden zordu.”','“Ağrım geçti mi? Kısmen. Karnım doydu mu? Hayır. Yıldız? Üç.”'],2:['“Doktor bana burcumu sordu. Kova olduğumu bilmeliydi.”','“Gözümün içine baktı, ‘evet’ dedi. Neye evet dediğini hâlâ bilmiyorum.”','“Beklerken sabrım tükendi, ilaçsız iyileştim. Teşekkürler… sanırım.”','“Muayeneden çok sedye yarışı izledim.”','“Hemşire gülümsedi, doktor gülmedi. Birini seçmeliydiler.”'],1:['“Bir yıldız da kediye.”','“Google bana daha iyi baktı, üstelik randevu da istemedi.”','“Geldiğimde ağrım 5/10’du, giderken 9/10. Bu hizmet mi, ceza mı?”','“Sıramı beklerken yaşlandım. Çıkışta çocuğum evlenmişti.”','“Doktoru görünce iyileştim; çünkü kaçmak için güç buldum.”']},RVC={5:['{c} ile gittim; doktor hem ciddiyetle hem şakayla baktı, ikisi de işe yaradı.'],4:['{c}… bunun için bile güler yüzle baktılar, helal olsun.'],3:['{c} yüzünden gittim; sonuç: hâlâ yaşıyorum, o da bir şey.'],2:['{c} için bekledim; bekleme salonunda ikinci bir şikâyet edindim.'],1:['{c} diye gittim, çıkarken derdim bir tane daha arttı.']};
+function revText(p,st){var c=(p&&p.enc&&p.enc.cc)||'';if(c&&Math.random()<.4){return '“'+pick(RVC[st]).replace('{c}',c)+'”'}return pick(RVT[st])}"""
+_i = h.index("RVT={5:")
+_j = h.index("function revAdd(p)")
+h = h[:_i] + _rv + "\n" + h[_j:]
+rep("var t=pick(RVT[st]);REV.list.push({n:p.n,s:st,t:t});", "var t=revText(p,st);REV.list.push({n:p.n,s:st,t:t,c:(p.enc&&p.enc.cc)||''});")
+rep("var sm=[srt[0],srt[srt.length-1]].concat(REV.list.length>2?[srt[Math.floor(srt.length/2)]]:[]);", "var sm=shuffle(srt.slice()).slice(0,5).sort(function(a,b){return b.s-a.s});")
+rep("Hasta '+r.n+': '+esc(r.t)+'</div>'", "Hasta '+r.n+(r.c?' <small>('+esc(r.c)+')</small>':'')+': '+esc(r.t)+'</div>'")
 
 # decoUp: phong metal; moto vb. başka yuvalar sonraki adımda eklenecek
 open(dst, 'w', encoding='utf8').write(h)

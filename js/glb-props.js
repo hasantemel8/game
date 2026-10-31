@@ -59,9 +59,11 @@
     { key: 'suit',   file: 'patient_suit.glb',   height: 1.78, armDown: 1.22 },
     { key: 'hoodie', file: 'patient_hoodie.glb', height: 1.74, rotY: Math.PI / 2 },
     { key: 'tee',    file: 'patient_tee.glb',    height: 1.80 },
-    { key: 'anna',   file: 'patient_anna.glb',   height: 1.68, armDown: 1.25, fem: true },
-    { key: 'scanf',  file: 'patient_scanf.glb',  height: 1.68, rotX: -Math.PI / 2, fem: true }
+    { key: 'anna',   file: 'patient_anna.glb',   height: 1.76, armDown: 1.25, fem: true },
+    { key: 'scanf',  file: 'patient_scanf.glb',  height: 1.74, rotX: -Math.PI / 2, fem: true }
   ]);
+
+  if (ABG.rig && ABG.rig.loadHand && Q.get('rig') !== '0') ABG.rig.loadHand(BASE + 'hand_pov.glb');
 
   var loader = new THREE.GLTFLoader();
   var ENV = ABG.pbr ? ABG.envI : 0;

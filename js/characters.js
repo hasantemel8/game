@@ -588,7 +588,7 @@
     opt = opt || {};
     var coat = col(sleeveHex), scrub = col(opt.scrub || 0x2f8f83), skin = col(skinHex), skinD = col(shade(skinHex, .86)), skinL = col(shade(skinHex, 1.06)),
       nail = col(opt.nail || 0xe9c3b4), lining = col(0x2a3a38), knuck = col(shade(skinHex, .93));
-    var M = new Mesh(), bones = [], names = [], parentOf = [], posOf = [], idx = {}, i, k;
+    var M = new Mesh(), MH = new Mesh(), bones = [], names = [], parentOf = [], posOf = [], idx = {}, i, k;
     function addBone(nm, par_, x, y, z) { idx[nm] = bones.length; var b = new THREE.Bone(); b.name = nm; bones.push(b); parentOf.push(par_ == null ? -1 : idx[par_]); posOf.push([x, y, z]); }
     addBone('fore', null, 0, 0, .30); addBone('wrist', 'fore', 0, 0, -.06);
     var FX = [-.0285, -.0095, .0095, .0285], FL = [.95, 1.0, .96, .78], FJ = [];
@@ -601,7 +601,7 @@
     for (i = 0; i < bones.length; i++) { var q = parentOf[i]; if (q < 0) bones[i].position.set(posOf[i][0], posOf[i][1], posOf[i][2]); else { bones[i].position.set(posOf[i][0] - posOf[q][0], posOf[i][1] - posOf[q][1], posOf[i][2] - posOf[q][2]); bones[q].add(bones[i]); } }
     var wB = function (a) { return [[idx[a], 1]]; }, wMix = function (a, b, t) { return [[idx[a], 1 - t], [idx[b], t]]; };
     var wfore = function (z) { return z > -.03 ? wB('fore') : z > -.09 ? wMix('fore', 'wrist', sstep(-.03, -.09, z)) : wB('wrist'); };
-    function loft(rings, flipFace) { var prev = -1, first = -1; rings.forEach(function (s) { var r = M.ring([s[1], s[2], s[0]], UX, UY, s[3], s[4], s[5], s[6], s[7]); if (prev >= 0) M.join(prev, r, true); else first = r; prev = r; }); return [first, prev]; }
+    function loft(rings, tgt) { tgt = tgt || M; var prev = -1, first = -1; rings.forEach(function (s) { var r = tgt.ring([s[1], s[2], s[0]], UX, UY, s[3], s[4], s[5], s[6], s[7]); if (prev >= 0) tgt.join(prev, r, true); else first = r; prev = r; }); return [first, prev]; }
     /* kol: önlük (geniş, kırışık) → ağız içi gölge → forma kolu → çıplak bilek */
     var wr = function (z, rr) { return rr * (1 + .035 * Math.sin(z * 55)); };
     var F = [[.30, 0, 0, wr(.30, .066), wr(.30, .062), coat, wfore(.30)], [.20, 0, 0, wr(.20, .070), wr(.20, .066), coat, wfore(.20)], [.10, 0, 0, wr(.10, .074), wr(.10, .069), coat, wfore(.10)],
@@ -610,20 +610,21 @@
     var fr = loft(F); M.cap(fr[0], false);
     /* el sırtı + avuç: yassı, kemikli bilekten parmak köküne */
     var hw = wB('wrist'), H = [[-.07, 0, 0, .030, .020, skin, hw], [-.095, 0, .001, .037, .0225, skinL, hw], [-.13, 0, .002, .044, .024, skinL, hw], [-.165, 0, .001, .047, .0225, knuck, hw], [-.192, 0, 0, .0485, .019, skinD, hw]];
-    loft(H);
+    loft(H, MH);
     var nailFn = function (t) { return Math.sin(t) > .25 ? nail : null; };
     for (k = 0; k < 4; k++) {
       var x = FX[k], a = 'f' + k + 'a', b = 'f' + k + 'b', c = 'f' + k + 'c', l = FJ[k], kz = -.19 + (k === 0 || k === 3 ? .006 : 0), r = .0108 * (k === 3 ? .88 : 1);
       var seg = [[kz + .004, x, -.003, r * 1.12, r * 1.0, skin, wMix('wrist', a, .5)], [kz - .012 * l, x, -.003, r * 1.04, r * .98, skin, wB(a)], [kz - .030 * l, x, -.004, r * .98, r * .94, knuck, wMix(a, b, .5)], [kz - .045 * l, x, -.004, r * .94, r * .9, skin, wB(b)],
         [kz - .060 * l, x, -.005, r * .9, r * .86, knuck, wMix(b, c, .5)], [kz - .074 * l, x, -.005, r * .88, r * .84, skin, wB(c)], [kz - .088 * l, x, -.006, r * .84, r * .8, skinL, wB(c), nailFn], [kz - .098 * l, x, -.006, r * .56, r * .5, skinL, wB(c), nailFn]];
-      var lr = loft(seg); M.cap(lr[1], true);
+      var lr = loft(seg, MH); MH.cap(lr[1], true);
     }
     var T = [[-.105, -.036 * sx, -.004, .0135, .012, skin, wB('wrist')], [-.128, -.041 * sx, -.007, .0125, .0115, skin, wMix('wrist', 't0', .6)], [-.150, -.044 * sx, -.009, .0115, .0105, knuck, wB('t0')], [-.170, -.046 * sx, -.011, .011, .010, skin, wMix('t0', 't1', .5)],
       [-.190, -.047 * sx, -.012, .0105, .0095, skin, wB('t1')], [-.206, -.047 * sx, -.012, .010, .009, skinL, wB('t1'), nailFn], [-.216, -.047 * sx, -.012, .006, .0055, skinL, wB('t1'), nailFn]];
-    var tr = loft(T); M.cap(tr[1], true);
+    var tr = loft(T, MH); MH.cap(tr[1], true);
     var mat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: .62, metalness: 0, skinning: true, envMapIntensity: ABG.envI || .25 });
-    var mesh = skinnedFrom(M, mat); mesh.add(bones[0]); par.add(mesh); par.updateMatrixWorld(true); mesh.updateMatrixWorld(true); bones[0].updateMatrixWorld(true);
-    mesh.bind(new THREE.Skeleton(bones)); mesh.frustumCulled = false; mesh.renderOrder = 3; mesh.scale.setScalar(opt.scale || 1.18);
+    var mesh = skinnedFrom(M, mat), meshH = skinnedFrom(MH, mat); mesh.add(bones[0]); par.add(mesh); par.add(meshH); par.updateMatrixWorld(true); mesh.updateMatrixWorld(true); meshH.updateMatrixWorld(true); bones[0].updateMatrixWorld(true);
+    var skel = new THREE.Skeleton(bones); meshH.bind(skel); meshH.frustumCulled = false; meshH.renderOrder = 3; meshH.scale.setScalar(opt.scale || 1.18);
+    mesh.bind(skel); mesh.frustumCulled = false; mesh.renderOrder = 3; mesh.scale.setScalar(opt.scale || 1.18);
     par.children.forEach(function (c) { if (c !== mesh && c.isMesh) c.visible = false; });
     /* saat (yalnızca sol kol, sx = -1) */
     if (sx < 0 && opt.watch !== false) {
@@ -635,13 +636,23 @@
       var hd = new THREE.Mesh(new THREE.BoxGeometry(.002, .0015, .016), new THREE.MeshBasicMaterial({ color: 0xdfe6e9 })); hd.position.set(0, .0395, -.006); hd.rotation.y = .5; wg.add(hd);
       wg.position.set(0, 0, -.015); bones[idx.wrist].add(wg);
     }
-    (R.arms = R.arms || []).push({ mesh: mesh, bones: bones, idx: idx, curl: .3, par: par, sx: sx, ph: Math.random() * 6 });
+    var arm = { mesh: mesh, meshH: meshH, bones: bones, idx: idx, curl: .3, par: par, sx: sx, ph: Math.random() * 6 };
+    (R.arms = R.arms || []).push(arm); if (R.handScene) attachHand(arm);
   };
+  /* gerçek (taranmış, CC-BY) el modeli: yüklendiğinde prosedürel eli gizler, bilek kemiğine bağlar */
+  function attachHand(arm) {
+    if (arm.hand || !R.handScene) return; var h = R.handScene.clone(true);
+    h.traverse(function (o) { if (o.isMesh) { var m = o.material; o.material = new THREE.MeshStandardMaterial({ map: m.map, color: 0xffffff, roughness: .6, metalness: 0, envMapIntensity: ABG.envI || .25 }); o.castShadow = false; o.renderOrder = 3; o.frustumCulled = false; } });
+    h.position.set(0, 0, .002); h.scale.setScalar(R.handScale || .95); if (arm.sx > 0) h.scale.x *= -1;
+    arm.bones[arm.idx.wrist].add(h); arm.hand = h; arm.meshH.visible = false;
+  }
+  R.loadHand = function (url) { if (!THREE.GLTFLoader) return; new THREE.GLTFLoader().load(url, function (g) { R.handScene = g.scene; (R.arms || []).forEach(attachHand); if (window.console) console.info('[VAR] el modeli hazır'); }, undefined, function () { }); };
   R.updateArms = function (dt, grip, t) {
     if (!R.arms) return;
     R.arms.forEach(function (a, i) {
       var tgt = grip ? 1 : .34; a.curl += (tgt - a.curl) * Math.min(1, dt * 9);
       var c = a.curl, b = a.bones, id = a.idx, br = Math.sin(t * 1.6 + i * 1.3) * .02, k;
+      if (a.hand) return;
       var base = [.55, .62, .70, .85];                                  /* işaret → serçe: hafif farklı kıvrım */
       for (k = 0; k < 4; k++) {
         var f = base[k] * (.25 + c * .95) + br;

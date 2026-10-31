@@ -26,3 +26,9 @@ Bu üç model Creative Commons Attribution 4.0 lisansıyla paylaşılmıştır (
 - **Ryan full body scan** — FletchTech — https://sketchfab.com/3d-models/ryan-full-body-scan-d0b560123d06492aa7bf9e5361642811 → `models/patient_tee.glb`
 - **Anna** — Trevon896850541 (CC-BY 4.0) — https://sketchfab.com/3d-models/anna-087e5e108dfd43af869e1ea6889014d0 → `models/patient_anna.glb`
 - **Full body 3D scan** — fablabbudapest (CC-BY 4.0) — https://sketchfab.com/3d-models/full-body-3d-scan-c531fb928a5c408286a1ab7d9e18958e → `models/patient_scanf.glb`
+
+### Birinci şahıs el modeli
+- "hand" — kevinruiz — https://sketchfab.com/3d-models/hand-a43c9c9059b24e2aa4af08d1a76f0916 — CC-BY-4.0 (kırpılıp ölçeklenerek `models/hand_pov.glb` yapıldı).
+
+### Klinik içerik notu
+- Bilgisayar ekranındaki EKG ve BT görüntüleri oyun içinde kodla (prosedürel) çizilir; harici kitap/atlas görüntüsü kopyalanmamıştır.
