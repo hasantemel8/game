@@ -205,7 +205,7 @@
     });
     /* gözler */
     [-1, 1].forEach(function (s) {
-      var cx = s * .038, open = (1 - bl) * (ex === 'surprised' ? 1.25 : ex === 'angry' ? .8 : 1), p = P(cx, ey), rx = .0145 * p[2], ry = .0090 * p[3] * open;
+      var cx = s * .038, open = (1 - bl) * (ex === 'surprised' ? 1.25 : ex === 'angry' ? .8 : ex === 'pain' ? .55 : ex === 'sleepy' ? .5 : ex === 'worry' ? 1.1 : 1), p = P(cx, ey), rx = .0145 * p[2], ry = .0090 * p[3] * open;
       if (ry < .8) ry = .8;
       ctx.save(); ctx.beginPath(); ctx.ellipse(p[0], p[1], rx, ry, 0, 0, Math.PI * 2); ctx.clip();
       ctx.fillStyle = bl > .5 ? skin : '#f3efe9'; ctx.fillRect(p[0] - rx, p[1] - ry, rx * 2, ry * 2);
@@ -224,7 +224,7 @@
       ctx.beginPath(); ctx.ellipse(p[0], p[1] + ry * .25, rx * .95, ry * 1.05, 0, .15, Math.PI - .15); ctx.stroke(); /* alt kapak */
       /* kaş */
       var inY = 1.652, outY = 1.657, lift = 0;
-      if (ex === 'angry') { inY -= .008; outY += .002; } else if (ex === 'sad') { inY += .009; outY -= .002; } else if (ex === 'surprised') { lift = .009; } else if (ex === 'smile') { lift = .002; }
+      if (ex === 'angry') { inY -= .008; outY += .002; } else if (ex === 'sad' || ex === 'worry') { inY += .009; outY -= .002; } else if (ex === 'pain') { inY += .004; outY -= .004; lift = -.002; } else if (ex === 'sleepy') { lift = -.004; } else if (ex === 'surprised') { lift = .009; } else if (ex === 'smile') { lift = .002; }
       var b0 = P(s * .015, inY + lift), b1 = P(s * .037, outY + .006 + lift), b2 = P(s * .060, outY - .004 + lift);
       ctx.strokeStyle = brow; ctx.lineCap = 'round'; ctx.lineWidth = (fem ? .0042 : .0062) * b1[3];
       ctx.beginPath(); ctx.moveTo(b0[0], b0[1]); ctx.quadraticCurveTo(b1[0], b1[1], b2[0], b2[1]); ctx.stroke();
@@ -241,7 +241,7 @@
     }
     /* ağız */
     var lip = fem ? '#b5524c' : '#a65f52', lipD = fem ? '#8f3a37' : '#7e463d';
-    var wm = (ex === 'smile' ? .056 : ex === 'surprised' ? .030 : .046), op = st.mouth * .022 + (ex === 'surprised' ? .016 : 0), cy = (ex === 'smile' ? .0045 : ex === 'sad' ? -.0045 : ex === 'angry' ? -.002 : 0.0006);
+    var wm = (ex === 'smile' ? .056 : ex === 'surprised' ? .030 : .046), op = st.mouth * .022 + (ex === 'surprised' ? .016 : 0), cy = (ex === 'smile' ? .0045 : (ex === 'sad' || ex === 'worry' || ex === 'pain') ? -.0045 : ex === 'angry' ? -.002 : 0.0006);
     var c0 = P(-wm / 2, mx + cy), c1 = P(wm / 2, mx + cy), mid = P(0, mx), up = P(0, mx + .0058 + op * .15), dn = P(0, mx - .0075 - op);
     if (op > .0025) {                                                  /* açık ağız */
       ctx.beginPath(); ctx.moveTo(c0[0], c0[1]); ctx.quadraticCurveTo(up[0], up[1] - 3, c1[0], c1[1]); ctx.quadraticCurveTo(dn[0], dn[1] + 4, c0[0], c0[1]);
@@ -443,6 +443,30 @@
     return V;
   };
   R.vpick = function (fem) { var a = R.vlist.filter(function (k) { return !!R.variants[k].fem === !!fem; }); return a.length ? a[Math.floor(Math.random() * a.length)] : null; };
+  /* kıyafet çeşitliliği: GLB malzemesi örnek başına kopyalanır; ten/baş bölgesi korunur, giysi pikselleri hue/doygunluk/ton kayar */
+  function recolor(mat, L) {
+    if (L.noRecolor || !mat || !mat.isMeshStandardMaterial) return mat;
+    var m = mat.clone(), hue = L.hueRot != null ? L.hueRot : (Math.random() < .35 ? 0 : (Math.random() * 6.28)), sat = L.satMul != null ? L.satMul : .75 + Math.random() * .6,
+      tint = new THREE.Color().setHSL(Math.random(), .35 + Math.random() * .35, .38 + Math.random() * .2), tw = L.tintW != null ? L.tintW : (Math.random() < .5 ? .75 : 0), lum = .85 + Math.random() * .3;
+    m.onBeforeCompile = function (sh) {
+      sh.uniforms.uHue = { value: hue }; sh.uniforms.uSat = { value: sat }; sh.uniforms.uTint = { value: tint }; sh.uniforms.uTW = { value: tw }; sh.uniforms.uLum = { value: lum };
+      sh.vertexShader = 'varying float vCy;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\nvCy = position.y;');
+      sh.fragmentShader = 'varying float vCy; uniform float uHue,uSat,uTW,uLum; uniform vec3 uTint;\n' + sh.fragmentShader.replace('#include <map_fragment>', `#include <map_fragment>
+        { vec3 c = diffuseColor.rgb; float mx = max(c.r,max(c.g,c.b)), mn = min(c.r,min(c.g,c.b)), sa = (mx-mn)/(mx+.001), lu = dot(c, vec3(.299,.587,.114));
+          bool skin = (c.r>c.g && c.g>c.b && sa>.18 && sa<.7 && lu>.18);
+          if (!skin && vCy < ${(TH*.84).toFixed(3)}) {
+            float cs = cos(uHue), sn = sin(uHue);
+            vec3 yiq = mat3(.299,.596,.211,.587,-.274,-.523,.114,-.322,.312) * c;
+            yiq.yz = mat2(cs,sn,-sn,cs) * yiq.yz * uSat;
+            vec3 r = mat3(1.,1.,1.,.956,-.272,-1.106,.621,-.647,1.703) * yiq;
+            vec3 n = uTint * lu * 1.3 * uLum;
+            c = mix(r * uLum, n, uTW * (1. - smoothstep(.1,.35,sa)));
+            diffuseColor.rgb = clamp(c, 0., 1.);
+          } }`);
+    };
+    m.customProgramCacheKey = function () { return 'rcv' + TH; };
+    return m;
+  }
   function makeVariant(L) {
     var V = R.variants[L.variant], g = new THREE.Group(), bones = [], i;
     for (i = 0; i < NAMES.length; i++) { var b = new THREE.Bone(); b.name = NAMES[i]; bones.push(b); }
@@ -450,7 +474,7 @@
     var skel = null, root = new THREE.Group(); g.add(root); root.add(bones[0]); g.updateMatrixWorld(true);
     skel = new THREE.Skeleton(bones);
     V.parts.forEach(function (q) {
-      var m = new THREE.SkinnedMesh(q.geometry, q.material); m.frustumCulled = false; m.castShadow = false; m.receiveShadow = true;
+      var m = new THREE.SkinnedMesh(q.geometry, recolor(q.material, L)); m.frustumCulled = false; m.castShadow = false; m.receiveShadow = true;
       root.add(m); m.updateMatrixWorld(true); m.bind(skel, m.matrixWorld);
     });
     var rig = { b: bones, L: L, ph: 0, w: 0, seed: Math.random() * 9, sit: false, lookY: 0, lookX: 0, mop: 0, face: null, tail: null, variant: L.variant };

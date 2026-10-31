@@ -287,6 +287,20 @@ rep("/* ---------- 6) KIRMIZI ALAN: yaratıcı vakalar + mini oyunlar ----------
 _prjs = open(__import__('os').path.join(__import__('os').path.dirname(__import__('os').path.abspath(__file__)), 'props.js'), encoding='utf8').read()
 rep("/* ---------- 6) KIRMIZI ALAN: yaratıcı vakalar + mini oyunlar ---------- */", _prjs + "/* ---------- 6) KIRMIZI ALAN: yaratıcı vakalar + mini oyunlar ---------- */")
 
+
+# --- 22) bedde ex olan hasta: üstüne örtü gelmesin, yattığı gibi kalsın; morg ekibi alsın ---
+rep("p.sheet=box(.98,.07,2.0,sheet,b.x,1.03,b.z);to={x:b.x+1.15,z:b.z}}", "to={x:b.x+1.15,z:b.z}}")
+
+
+# --- 23) perdeli kabinler + kapı detayları; örtü sadece kalçadan aşağıyı kapatsın (hasta görünsün) ---
+_cujs = open(__import__('os').path.join(__import__('os').path.dirname(__import__('os').path.abspath(__file__)), 'curtain.js'), encoding='utf8').read()
+rep("/* ---------- 6) KIRMIZI ALAN: yaratıcı vakalar + mini oyunlar ---------- */", _cujs + "/* ---------- 6) KIRMIZI ALAN: yaratıcı vakalar + mini oyunlar ---------- */")
+
+
+# --- 24) ruh hali yüz ifadeleri ---
+_mdjs = open(__import__('os').path.join(__import__('os').path.dirname(__import__('os').path.abspath(__file__)), 'mood.js'), encoding='utf8').read()
+rep("/* ---------- 6) KIRMIZI ALAN: yaratıcı vakalar + mini oyunlar ---------- */", _mdjs + "/* ---------- 6) KIRMIZI ALAN: yaratıcı vakalar + mini oyunlar ---------- */")
+
 # decoUp: phong metal; moto vb. başka yuvalar sonraki adımda eklenecek
 open(dst, 'w', encoding='utf8').write(h)
 print('tamam:', dst)

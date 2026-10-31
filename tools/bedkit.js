@@ -4,8 +4,8 @@ function bkCloth(w,h,d,col,amp){var g=new THREE.BoxGeometry(w,h,d,18,1,26),p=g.a
 function bkTube(pts,r,col){var t=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),28,r,6,false),new THREE.MeshStandardMaterial({color:col,roughness:.5,metalness:0,transparent:col===0xdde6ea,opacity:col===0xdde6ea?.7:1}));return t}
 function bkBuild(b){var g=new THREE.Group();scene.add(g);var bx=b.x,bz=b.z,red=!!b.red,W=red?1.0:.94;
   var K={g:g,b:b,cols:[0x7fb5d6,0x9fc8b5,0xd9d4c4,0xb9a7d6,0xe7b6b0]};
-  var bl=new THREE.Group();bl.position.set(bx,1.045,bz+.55);var cl=bkCloth(W+.1,.025,1.05,0x7fb5d6,.01);bl.add(cl);K.bl=cl;
-  var fold=new THREE.Mesh(new THREE.BoxGeometry(W*.9,.03,.16),new THREE.MeshStandardMaterial({color:0xf2f4f5,roughness:.95}));fold.position.set(0,.012,-.47);bl.add(fold);g.add(bl);
+  var bl=new THREE.Group();bl.position.set(bx,1.045,bz+.74);var cl=bkCloth(W+.1,.025,.74,0x7fb5d6,.01);bl.add(cl);K.bl=cl;
+  var fold=new THREE.Mesh(new THREE.BoxGeometry(W*.9,.03,.16),new THREE.MeshStandardMaterial({color:0xf2f4f5,roughness:.95}));fold.position.set(0,.012,-.3);bl.add(fold);g.add(bl);
   var pil=new THREE.Mesh(new THREE.BoxGeometry(.5,.1,.34),new THREE.MeshStandardMaterial({color:0xf4f6f7,roughness:.95}));pil.position.set(bx,.79,bz-.93);pil.rotation.x=-.08;g.add(pil);
   /* EKG elektrotları + kablolar */
   var el=new THREE.Group();g.add(el);var mx=bx+(red?1.0:1.05),mz=red?-9.6:-9.5;
@@ -23,4 +23,4 @@ function bkBuild(b){var g=new THREE.Group();scene.add(g);var bx=b.x,bz=b.z,red=!
 /* sabit serum askısı direği (hastadan bağımsız) */
 function bkPole(b){var m=new THREE.MeshStandardMaterial({color:0xc9d0d4,roughness:.35,metalness:.7}),sx=b.x-.62,sz=b.z-.45;var p=new THREE.Mesh(new THREE.CylinderGeometry(.013,.013,1.8,10),m);p.position.set(sx,.9,sz);scene.add(p);var h=new THREE.Mesh(new THREE.BoxGeometry(.3,.015,.015),m);h.position.set(sx,1.78,sz);scene.add(h);[0,1,2,3,4].forEach(function(i){var a=i*1.2566,f=new THREE.Mesh(new THREE.BoxGeometry(.28,.015,.02),m);f.position.set(sx,.04,sz);f.rotation.y=a;scene.add(f)})}
 var _bV34=build;build=function(){_bV34();try{beds.forEach(function(b){bkBuild(b)})}catch(e){if(window.console)console.error(e)}};
-var _gfV34=gfxFrame;gfxFrame=function(dt){_gfV34(dt);try{BK.forEach(function(K){var b=K.b,p=b.busy?b.p:null,on=!!p&&p.g&&p.g.parent===scene&&!p.fell&&(p.state==='bed'||p.state==='trauma'||p.state==='await');if(on&&!K.p){K.cl=K.cols[(p.n*7)%K.cols.length];K.bl.material.color.setHex(K.cl);K.bl.material.needsUpdate=true}K.p=on?p:null;K.g.visible=on;if(on){K.pd.visible=!!b.red||p.state==='trauma';K.iv.visible=!!b.red||(p.n%3!==0)}})}catch(e){}};
+var _gfV34=gfxFrame;gfxFrame=function(dt){_gfV34(dt);try{BK.forEach(function(K){var b=K.b,p=b.busy?b.p:null,on=!!p&&p.g&&p.g.parent===scene&&!p.fell&&(p.state==='bed'||p.state==='trauma'||p.state==='await'||(p.dead&&p.bed&&p.g.position.y>.5));if(on&&!K.p){K.cl=K.cols[(p.n*7)%K.cols.length];K.bl.material.color.setHex(K.cl);K.bl.material.needsUpdate=true}K.p=on?p:null;K.g.visible=on;if(on){K.bl.parent.visible=!p.dead;K.pd.visible=!!b.red||p.state==='trauma';K.iv.visible=!!b.red||(p.n%3!==0)}})}catch(e){}};

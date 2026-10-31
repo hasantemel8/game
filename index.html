@@ -4117,7 +4117,7 @@ vkSteps=function(d){var st=_vsV17(d);try{if(d.img){var sys=CTSYS[d.img.fam]||'ka
 /* ---------- 4) ölüm: yere düşme yok, sedyeden/yataktan morga ---------- */
 deathFall=function(p){if(p.dead)return;p.dead=true;p.state='dead';p.busy=false;p.via=[];p.exitTo=null;if(p.bar)p.bar.visible=false;if(p.seat){p.seat.taken=false;p.seat=null}if(p.trauma)ecgRed.mode='flat';
   var sheet=Lm(0xf2f4f3),to;
-  if(p.bed&&p.g.position.y>.5){var b=p.bed;p.sheet=box(.98,.07,2.0,sheet,b.x,1.03,b.z);to={x:b.x+1.15,z:b.z}}
+  if(p.bed&&p.g.position.y>.5){var b=p.bed;to={x:b.x+1.15,z:b.z}}
   else{var x=p.g.position.x,z=p.g.position.z;if(Math.abs(x-POLI.stool.x)<.8&&Math.abs(z-POLI.stool.z)<.8){x=-8.0;z=7.4;POLI.callT=Math.max(POLI.callT,9)}
     var sm=makeStretcherModel(),g=sm.g;g.position.set(x,0,z);scene.add(g);p.parkS=g;if(p.wc)p.wc.g.visible=false;try{sitPose(p.g,false)}catch(e){}
     g.add(p.g);p.g.rotation.order='XYZ';p.g.position.set(0,1.0,.9);p.g.rotation.set(-Math.PI/2,0,0);p.sheet=box(.86,.06,1.9,sheet,0,1.12,0,g);to={x:x,z:z};
@@ -4381,8 +4381,8 @@ function bkCloth(w,h,d,col,amp){var g=new THREE.BoxGeometry(w,h,d,18,1,26),p=g.a
 function bkTube(pts,r,col){var t=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),28,r,6,false),new THREE.MeshStandardMaterial({color:col,roughness:.5,metalness:0,transparent:col===0xdde6ea,opacity:col===0xdde6ea?.7:1}));return t}
 function bkBuild(b){var g=new THREE.Group();scene.add(g);var bx=b.x,bz=b.z,red=!!b.red,W=red?1.0:.94;
   var K={g:g,b:b,cols:[0x7fb5d6,0x9fc8b5,0xd9d4c4,0xb9a7d6,0xe7b6b0]};
-  var bl=new THREE.Group();bl.position.set(bx,1.045,bz+.55);var cl=bkCloth(W+.1,.025,1.05,0x7fb5d6,.01);bl.add(cl);K.bl=cl;
-  var fold=new THREE.Mesh(new THREE.BoxGeometry(W*.9,.03,.16),new THREE.MeshStandardMaterial({color:0xf2f4f5,roughness:.95}));fold.position.set(0,.012,-.47);bl.add(fold);g.add(bl);
+  var bl=new THREE.Group();bl.position.set(bx,1.045,bz+.74);var cl=bkCloth(W+.1,.025,.74,0x7fb5d6,.01);bl.add(cl);K.bl=cl;
+  var fold=new THREE.Mesh(new THREE.BoxGeometry(W*.9,.03,.16),new THREE.MeshStandardMaterial({color:0xf2f4f5,roughness:.95}));fold.position.set(0,.012,-.3);bl.add(fold);g.add(bl);
   var pil=new THREE.Mesh(new THREE.BoxGeometry(.5,.1,.34),new THREE.MeshStandardMaterial({color:0xf4f6f7,roughness:.95}));pil.position.set(bx,.79,bz-.93);pil.rotation.x=-.08;g.add(pil);
   /* EKG elektrotları + kablolar */
   var el=new THREE.Group();g.add(el);var mx=bx+(red?1.0:1.05),mz=red?-9.6:-9.5;
@@ -4400,7 +4400,7 @@ function bkBuild(b){var g=new THREE.Group();scene.add(g);var bx=b.x,bz=b.z,red=!
 /* sabit serum askısı direği (hastadan bağımsız) */
 function bkPole(b){var m=new THREE.MeshStandardMaterial({color:0xc9d0d4,roughness:.35,metalness:.7}),sx=b.x-.62,sz=b.z-.45;var p=new THREE.Mesh(new THREE.CylinderGeometry(.013,.013,1.8,10),m);p.position.set(sx,.9,sz);scene.add(p);var h=new THREE.Mesh(new THREE.BoxGeometry(.3,.015,.015),m);h.position.set(sx,1.78,sz);scene.add(h);[0,1,2,3,4].forEach(function(i){var a=i*1.2566,f=new THREE.Mesh(new THREE.BoxGeometry(.28,.015,.02),m);f.position.set(sx,.04,sz);f.rotation.y=a;scene.add(f)})}
 var _bV34=build;build=function(){_bV34();try{beds.forEach(function(b){bkBuild(b)})}catch(e){if(window.console)console.error(e)}};
-var _gfV34=gfxFrame;gfxFrame=function(dt){_gfV34(dt);try{BK.forEach(function(K){var b=K.b,p=b.busy?b.p:null,on=!!p&&p.g&&p.g.parent===scene&&!p.fell&&(p.state==='bed'||p.state==='trauma'||p.state==='await');if(on&&!K.p){K.cl=K.cols[(p.n*7)%K.cols.length];K.bl.material.color.setHex(K.cl);K.bl.material.needsUpdate=true}K.p=on?p:null;K.g.visible=on;if(on){K.pd.visible=!!b.red||p.state==='trauma';K.iv.visible=!!b.red||(p.n%3!==0)}})}catch(e){}};
+var _gfV34=gfxFrame;gfxFrame=function(dt){_gfV34(dt);try{BK.forEach(function(K){var b=K.b,p=b.busy?b.p:null,on=!!p&&p.g&&p.g.parent===scene&&!p.fell&&(p.state==='bed'||p.state==='trauma'||p.state==='await'||(p.dead&&p.bed&&p.g.position.y>.5));if(on&&!K.p){K.cl=K.cols[(p.n*7)%K.cols.length];K.bl.material.color.setHex(K.cl);K.bl.material.needsUpdate=true}K.p=on?p:null;K.g.visible=on;if(on){K.bl.parent.visible=!p.dead;K.pd.visible=!!b.red||p.state==='trauma';K.iv.visible=!!b.red||(p.n%3!==0)}})}catch(e){}};
 /* ---------- YATAK BAŞI MONİTÖR DETAYI, OKSİJEN TÜPÜ, AMBU ---------- */
 function prM(c,r,m){return new THREE.MeshStandardMaterial({color:c,roughness:r==null?.6:r,metalness:m||0})}
 function prB(par,w,h,d,mat,x,y,z){var o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);o.position.set(x,y,z);o.castShadow=true;par.add(o);return o}
@@ -4431,6 +4431,36 @@ function bkAmbu(x,y,z,ry){var g=new THREE.Group();g.position.set(x,y,z);g.rotati
   var rs=new THREE.Mesh(new THREE.SphereGeometry(1,14,10),prM(0xe5f1f6,.4));rs.scale.set(.04,.05,.12);rs.position.set(0,.09,.22);g.add(rs);
   prC(g,.01,.01,.07,prM(0x2f9e44,.5),0,.07,.145,8).rotation.x=Math.PI/2;return g}
 var _bV35=build;build=function(){_bV35();try{MONS.forEach(monDetail);beds.forEach(function(b){o2Tank(b.x-.95,b.z-1.0);bkAmbu(b.x+.38,1.2,b.z-1.12,0)})}catch(e){if(window.console)console.error(e)}};
+/* ---------- PERDELİ KABİNLER + KAPI DETAYLARI ---------- */
+function bkCurtain(x,z,len,ry,col,band){var g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=ry;scene.add(g);
+  var seg=Math.round(len*16),geo=new THREE.PlaneGeometry(len,1.42,seg,6),p=geo.attributes.position,cs=[],c0=new THREE.Color(col),c1=new THREE.Color(band);
+  for(var i=0;i<p.count;i++){var px=p.getX(i),py=p.getY(i);p.setZ(i,Math.sin(px*10.5)*.05+Math.sin(px*27)*.008+(py<0?Math.sin(px*10.5)*.01:0));var cc=py<-.45?c1:c0;cs.push(cc.r,cc.g,cc.b)}
+  geo.setAttribute('color',new THREE.Float32BufferAttribute(cs,3));geo.computeVertexNormals();
+  var f=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({vertexColors:true,roughness:.96,side:THREE.DoubleSide}));f.position.y=.95;f.castShadow=true;g.add(f);
+  var ng=new THREE.PlaneGeometry(len,.52,seg,2),np=ng.attributes.position;for(var j=0;j<np.count;j++)np.setZ(j,Math.sin(np.getX(j)*10.5)*.05);ng.computeVertexNormals();
+  var n=new THREE.Mesh(ng,new THREE.MeshStandardMaterial({color:0xf2f6f7,roughness:.9,transparent:true,opacity:.38,side:THREE.DoubleSide,depthWrite:false}));n.position.y=1.92;g.add(n);
+  var st=new THREE.MeshStandardMaterial({color:0xc9d0d4,roughness:.35,metalness:.7});var rl=new THREE.Mesh(new THREE.BoxGeometry(len+.04,.03,.05),st);rl.position.y=2.22;g.add(rl);
+  for(var k=0;k<=Math.floor(len/.16);k++){var r=new THREE.Mesh(new THREE.TorusGeometry(.018,.004,6,10),st);r.position.set(-len/2+.05+k*.16,2.18,0);r.rotation.y=Math.PI/2;g.add(r)}
+  return g}
+function doorDetail(){try{var D=DOOR,st=new THREE.MeshStandardMaterial({color:0xcfd6da,roughness:.3,metalness:.8}),dk=new THREE.MeshStandardMaterial({color:0x2b3136,roughness:.6});
+  [[D.l,.42],[D.r,-.42]].forEach(function(a){var m=a[0],zz=a[1];[-1,1].forEach(function(s){var bar=new THREE.Mesh(new THREE.CylinderGeometry(.014,.014,.55,10),st);bar.position.set(s*.075,-.05,zz);m.add(bar);[.2,-.2].forEach(function(dy){var so=new THREE.Mesh(new THREE.CylinderGeometry(.007,.007,.04,6),st);so.rotation.z=Math.PI/2;so.position.set(s*.05,-.05+dy,zz);m.add(so)})});
+    var kp=new THREE.Mesh(new THREE.BoxGeometry(.1,.24,1.06),st);kp.position.set(0,-1.0,0);m.add(kp);var gk=new THREE.Mesh(new THREE.BoxGeometry(.1,2.3,.02),dk);gk.position.set(0,0,-a[1]/.42*.545);m.add(gk)});
+  var sn=new THREE.Mesh(new THREE.BoxGeometry(.32,.09,.06),dk);sn.position.set(16.85,2.44,7);scene.add(sn);var led=new THREE.Mesh(new THREE.SphereGeometry(.012,8,6),new THREE.MeshBasicMaterial({color:0x2fe28a}));led.position.set(16.85,2.44,7.04);scene.add(led)}catch(e){if(window.console)console.error(e)}}
+var _bV36=build;build=function(){_bV36();try{
+  var hide=[];scene.traverse(function(o){var gp=o.geometry&&o.geometry.parameters;if(o.isMesh&&gp&&gp.width===.05&&gp.depth===3.6&&(gp.height===2||gp.height===2.2||gp.height===2.0))hide.push(o)});
+  hide.forEach(function(o){o.visible=false;var red=o.geometry.parameters.height===2.2;bkCurtain(o.position.x,o.position.z,3.5,Math.PI/2,red?0xe3a9a3:0x9fd0c6,red?0xc9716a:0x5fa89a)});
+  doorDetail()}catch(e){if(window.console)console.error(e)}};
+/* ---------- ruh hali: hasta/personel yüz ifadeleri durumdan türetilir ---------- */
+var MOOD={t:0};
+var _gfMd=gfxFrame;gfxFrame=function(dt){_gfMd(dt);try{MOOD.t-=dt;if(MOOD.t>0||!window.ABG||!ABG.rig||!ABG.rig.express)return;MOOD.t=.7;
+P.forEach(function(p){if(!p.g||!p.g.userData||!p.g.userData.rig||p.g.parent!==scene)return;var e=null,r=Math.random();
+if(p.dead||p.state==='dead')e='sleepy';
+else if(p.state==='wait'){var f=p.max?p.patience/p.max:1;e=f<.3?'angry':f<.6?'worry':(f>.85&&r<.3?'smile':null)}
+else if(p.trauma||p.state==='trauma')e='pain';
+else if(p.state==='bed'||p.state==='await')e=(p.n%3===0)?'sleepy':'pain';
+else if(p.state==='chase'||p.state==='alarm')e='surprised';
+if(e)ABG.rig.express(p.g,e,1.2)});
+[ECEW,HUS,CLN].forEach(function(w){if(w&&w.g&&w.g.userData&&w.g.userData.rig&&Math.random()<.12)ABG.rig.express(w.g,Math.random()<.7?'smile':'worry',2.2)})}catch(e){}};
 /* ---------- 6) KIRMIZI ALAN: yaratıcı vakalar + mini oyunlar ---------- */
 var RGC=[
  {key:'rg_pnx',rg:'needle',age:24,sex:'Erkek',look:'kirik',cc:'Nefes darlığı, göğüs travması',vit:[136,'78/42',84,36.4],absurd:'Gidon göğsüne saplanan motokurye',
