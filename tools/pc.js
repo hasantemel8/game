@@ -124,6 +124,7 @@ function pcDraw(o,t){var x=o.x,W=512,H=300;
     var fr=0,tt=0;try{beds.forEach(function(b){tt++;if(!b.busy)fr++})}catch(e){}var wc=0;try{wc=waiting().length}catch(e){}
     x.font='24px monospace';x.fillStyle='#bff5d0';x.fillText('Boş yatak : '+fr+' / '+tt,16,84);x.fillText('Bekleyen  : '+wc,16,122);x.fillText('Puan      : '+Math.round(S.score||0),16,160);
     x.strokeStyle='#2fe28a';x.lineWidth=2;x.beginPath();for(var i=0;i<W-30;i++){var yy=230-Math.sin(i*.05+t*3)*8*Math.sin(i*.011+t);if(i===0)x.moveTo(15,yy);else x.lineTo(15+i,yy)}x.stroke()}
+  else if(o.kind==='defib'){dfDraw(x,W,H,t)}
   else if(!pcInfo(pcCur()).has){splash(x,W,H,t)}
   else{var p=pcCur(),I=pcInfo(p),hr=I.ehr||I.hr,md=I.mode;x.fillStyle='#071a14';x.fillRect(0,0,W,H);x.fillStyle='#1b5e3b';x.fillRect(0,0,W,34);x.fillStyle='#fff';x.font='bold 20px sans-serif';x.fillText(p?('Hasta '+p.n+(p.name?' · '+p.name:'')):'POLİKLİNİK · HASTA BEKLENİYOR',10,24);
     ecgBand(x,10,44,300,100,md,hr,t,2,0,'II');ecgBand(x,10,148,300,70,md,hr,t,1.5,.18,'V5');
@@ -141,7 +142,7 @@ function pczClose(){if(!PCZ.on)return;PCZ.on=false;show('#pcz',false);S.mode='pl
   C.addEventListener('wheel',function(e){e.preventDefault();PCZ.slice=clamp(PCZ.slice+(e.deltaY>0?1:-1),1,20);$('#pczS').value=PCZ.slice;PCZ.ctDirty=true},{passive:false});
   $('#pczS').addEventListener('input',function(){PCZ.slice=+this.value;PCZ.ctDirty=true});$('#pczX').addEventListener('click',pczClose);
   addEventListener('keydown',function(e){if(PCZ.on&&(e.code==='Escape'||e.code==='KeyE')){e.preventDefault();e.stopPropagation();pczClose()}},true)})();
-var _bV31=build;build=function(){_bV31();try{pcMake(4.9,1.16,4.35,Math.PI,'tri');pcMake(7.1,1.16,4.35,Math.PI,'tri2');pcMake(POLI.desk.x+.05,.77,POLI.desk.z+.55,Math.PI/2+.5,'poli');}catch(e){if(window.console)console.error(e)}};
+var _bV31=build;build=function(){_bV31();try{pcMake(4.9,1.16,4.35,Math.PI,'tri');pcMake(7.1,1.16,4.35,Math.PI,'tri2');pcMake(POLI.desk.x+.05,.77,POLI.desk.z+.55,Math.PI/2+.5,'poli');buildDefib3D(7.95,-5.85,0);}catch(e){if(window.console)console.error(e)}};
 var _gfV31=gfxFrame;gfxFrame=function(dt){_gfV31(dt);try{PCT+=dt;if(PCT>.12){PCT=0;var t=S.t||0;PCS.forEach(function(o){if(Math.hypot(camera.position.x-o.px,camera.position.z-o.pz)<16)pcDraw(o,t)});if(PCZ.on)pczDraw(t,false)}}catch(e){}};
 
 /* ---------- personel gezintisi: hemşire + temizlikçi ---------- */

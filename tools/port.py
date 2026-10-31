@@ -257,6 +257,36 @@ rep("Hasta '+r.n+': '+esc(r.t)+'</div>'", "Hasta '+r.n+(r.c?' <small>('+esc(r.c)
 rep("p._voxT=S.t;voxStop();setTimeout(function(){voxSay(w.join('. '),p)},280)", "p._vsp=p._vsp||{};w=w.filter(function(l){if(p._vsp[l])return false;p._vsp[l]=1;return true});if(!w.length)return;p._voxT=S.t;voxStop();setTimeout(function(){voxSay(w.join('. '),p)},280)")
 rep("(S.mode==='cine'?-6:0);", "(S.mode==='cine'?-6:0)-(S.pcz?Math.max(0,GFX.fov-28):0);")
 
+
+# --- 19) gerçekçi defibrilatör: 3B cihaz + şarj / çekilin / şok akışı ---
+_dfjs = open(__import__('os').path.join(__import__('os').path.dirname(__import__('os').path.abspath(__file__)), 'defib.js'), encoding='utf8').read()
+rep("/* ---------- 6) KIRMIZI ALAN: yaratıcı vakalar + mini oyunlar ---------- */", _dfjs + "/* ---------- 6) KIRMIZI ALAN: yaratıcı vakalar + mini oyunlar ---------- */")
+rep("PR.slot('defib',[],7.95,0,-5.85,0);", "")
+_dfhtml = """<div id="df" class="overlay" hidden><div class="panel dfp"><style>.dfp{width:min(560px,100%)!important}.dfrow{display:flex;gap:8px;flex-wrap:wrap}.dfrow .big{flex:1;min-width:120px}.dfe{flex:1;padding:12px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.08);color:inherit;font:700 18px var(--disp,sans-serif);cursor:pointer}.dfe.on{outline:2px solid #ffd23f;background:rgba(255,210,63,.18)}.dfe:disabled,.dfp .big:disabled{opacity:.4;cursor:not-allowed}</style>
+    <h3>Kod Mavi · Defibrilatör</h3>
+    <canvas id="dfScr" width="520" height="170" style="width:100%;border-radius:10px;background:#050b09"></canvas>
+    <canvas id="dfEcg" width="460" height="110" hidden></canvas>
+    <div id="dfTxt">Ritim analiz ediliyor…</div>
+    <div class="dfrow"><button class="dfe" data-e="120" type="button">120 J</button><button class="dfe" data-e="150" type="button">150 J</button><button class="dfe" data-e="200" type="button">200 J</button></div>
+    <div class="dfrow"><button id="dfChg" class="big" type="button">1 · ŞARJ</button><button id="dfClr" class="big alt" type="button">2 · ÇEKİLİN!</button><button id="dfShk" class="big" type="button" style="background:#c62828;color:#fff">3 · ŞOK</button></div>
+    <div class="bar" hidden><div class="zone" id="dfZone"></div><div class="fill" id="dfFill"></div></div>
+    <button class="big" id="dfBtn" hidden>ŞOK</button>
+    <div class="tiny" id="dfAtt"></div>
+  </div></div>"""
+_a = h.index('<div id="df" class="overlay" hidden>')
+_b = h.index('<div id="drug" class="overlay" hidden>')
+h = h[:_a] + _dfhtml + "\n\n  " + h[_b:]
+
+
+# --- 20) yatak donanımı: battaniye, elektrot/ped, serum ---
+_bkjs = open(__import__('os').path.join(__import__('os').path.dirname(__import__('os').path.abspath(__file__)), 'bedkit.js'), encoding='utf8').read()
+rep("/* ---------- 6) KIRMIZI ALAN: yaratıcı vakalar + mini oyunlar ---------- */", _bkjs + "/* ---------- 6) KIRMIZI ALAN: yaratıcı vakalar + mini oyunlar ---------- */")
+
+
+# --- 21) yatak başı monitör detayı, oksijen tüpü, ambu ---
+_prjs = open(__import__('os').path.join(__import__('os').path.dirname(__import__('os').path.abspath(__file__)), 'props.js'), encoding='utf8').read()
+rep("/* ---------- 6) KIRMIZI ALAN: yaratıcı vakalar + mini oyunlar ---------- */", _prjs + "/* ---------- 6) KIRMIZI ALAN: yaratıcı vakalar + mini oyunlar ---------- */")
+
 # decoUp: phong metal; moto vb. başka yuvalar sonraki adımda eklenecek
 open(dst, 'w', encoding='utf8').write(h)
 print('tamam:', dst)
