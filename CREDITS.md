@@ -28,10 +28,13 @@ Bu üç model Creative Commons Attribution 4.0 lisansıyla paylaşılmıştır (
 - **Full body 3D scan** — fablabbudapest (CC-BY 4.0) — https://sketchfab.com/3d-models/full-body-3d-scan-c531fb928a5c408286a1ab7d9e18958e → `models/patient_scanf.glb`
 
 ### Birinci şahıs el modeli
-- "hand" — kevinruiz — https://sketchfab.com/3d-models/hand-a43c9c9059b24e2aa4af08d1a76f0916 — CC-BY-4.0 (kırpılıp ölçeklenerek `models/hand_pov.glb` yapıldı).
 
 ### Klinik içerik notu
 - Bilgisayar ekranındaki EKG ve BT görüntüleri oyun içinde kodla (prosedürel) çizilir; harici kitap/atlas görüntüsü kopyalanmamıştır.
 
 ## Kullanıcı tarafından sağlanan karakter modelleri (v_*.glb)
 models/v_*.glb: proje sahibinin eklediği insan modelleri; dokular küçültüldü, animasyonlar çıkarıldı, T-pozlu olanların kolları oyun kodunda aşağı indirilir. Orijinal lisans/yazar bilgileri model kaynaklarından kontrol edilmelidir.
+
+
+## Kullanıcının eklediği ek modeller
+models/fp_arms.glb (FPS kolları), item_m4.glb (M4 tüfek), item_bicak.glb (bıçak), zombie_a.glb / zombie_b.glb (zombiler), ambulance.glb: proje sahibi tarafından sağlandı; dokular küçültüldü. Özgün yazar/lisans bilgisi kaynak sayfalarından kontrol edilmelidir.

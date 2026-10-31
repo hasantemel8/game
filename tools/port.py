@@ -311,6 +311,26 @@ rep("#cnSkip:hover{background:rgba(255,255,255,.12)}", "#cnSkip:hover{background
 # --- 27) menü okunurluğu ---
 rep("#cnSkip{background:rgba(0,0,0,.5)!important}", "#cnSkip{background:rgba(0,0,0,.5)!important}"+'\n/* menü okunurluğu */\n#menu{background:linear-gradient(90deg,rgba(3,8,10,.94) 0%,rgba(3,8,10,.8) 38%,rgba(3,8,10,.3) 72%,rgba(3,8,10,.05)),linear-gradient(0deg,rgba(3,8,10,.85),transparent 35%)!important}\n#menu .wrap{text-shadow:0 2px 10px rgba(0,0,0,.9),0 0 3px rgba(0,0,0,.8)}\n#menuList button{color:#f4f1e8!important;text-shadow:0 2px 8px #000;background:rgba(4,10,12,.45)!important}\n#menuList #bNew{color:var(--yellow)!important}\n#menuList button:disabled{opacity:.55!important;color:#c3d0d2!important}\n#menuHint,#menuFoot{color:#d3e0e2!important;text-shadow:0 1px 6px #000}\n')
 
+# --- 28) felaket bölümleri, KPR efekti, başhekim/teşekkür düzeltmeleri ---
+_dsjs = open(__import__('os').path.join(__import__('os').path.dirname(__import__('os').path.abspath(__file__)), 'disaster.js'), encoding='utf8').read()
+_cfjs = open(__import__('os').path.join(__import__('os').path.dirname(__import__('os').path.abspath(__file__)), 'cprfx.js'), encoding='utf8').read()
+rep("/* ---------- 6) KIRMIZI ALAN: yaratıcı vakalar + mini oyunlar ---------- */", _cfjs + _dsjs + "/* ---------- 6) KIRMIZI ALAN: yaratıcı vakalar + mini oyunlar ---------- */")
+rep("$('#endNext').addEventListener('click',function(){if(S.over){S.day=0;S.over=null}S.day++;startGame()});", "$('#endNext').addEventListener('click',function(){if(S.over){S.day=0;S.over=null}S.day++;if(S.day>6)S.day=1;startGame()});")
+rep("'Sağ olun! Nihal Hanım’a da selam söyleyin.'];", "'Sağ olun! Allah kolaylık versin size.','Valla acil bu kadar sakin olur demezdim, sağ olun.','Hocam sizi unutmayacağım, ellerinize sağlık!'];")
+rep("function thanks(p){if(Math.random()>.55)return;", "var THXL=-1;function thanks(p){if(Math.random()>.55)return;")
+rep("var l=pick(THX);tagOn(p,'🙏 Teşekkürler!'", "var l,ti=0;do{l=pick(THX);ti++}while(l===THXL&&ti<6);THXL=l;tagOn(p,'🙏 Teşekkürler!'")
+# başhekim: peşinden dolaşmasın; servis içinde gezinip uzaktan izlesin
+rep("var tx,tz;if(BH.st==='leave'){tx=25;tz=7}else{var v=V(0,0,0);camera.getWorldDirection(v);var l=Math.hypot(v.x,v.z)||1;tx=camera.position.x+v.x/l*1.7-v.z/l*1.7;tz=camera.position.z+v.z/l*1.7+v.x/l*1.7}",
+    "var tx,tz;if(BH.st==='leave'){tx=25;tz=7}else{var WPT=[[-8,-4.6],[2,-4.8],[10.5,-5],[-6,4.5],[4,5.5],[12,3],[-12,2]];if(!BH.wp||BH.wt<=0||Math.hypot(BH.wp[0]-g.position.x,BH.wp[1]-g.position.z)<.4){var nw=WPT[Math.floor(Math.random()*WPT.length)];if(Math.hypot(nw[0]-camera.position.x,nw[1]-camera.position.z)<2.2)nw=WPT[(WPT.indexOf(nw)+3)%WPT.length];BH.wp=nw;BH.wt=rnd(9,15)}BH.wt-=dt;tx=BH.wp[0];tz=BH.wp[1]}")
+rep("else{g.rotation.y=Math.atan2(camera.position.x-g.position.x,camera.position.z-g.position.z);if(BH.st==='come')BH.st='insp'}", "else{g.rotation.y=Math.atan2(BH.wp?BH.wp[0]*0+(BH.wp[0]>0?-1:1)*.2:0,-1);if(BH.st==='come')BH.st='insp'}")
+
+# --- 29) M4 + bıçak item'ları, zombi modelleri ---
+_wpjs = open(__import__('os').path.join(__import__('os').path.dirname(__import__('os').path.abspath(__file__)), 'weapons.js'), encoding='utf8').read()
+rep("/* ---------- 6) KIRMIZI ALAN: yaratıcı vakalar + mini oyunlar ---------- */", _wpjs + "/* ---------- 6) KIRMIZI ALAN: yaratıcı vakalar + mini oyunlar ---------- */")
+rep("  addItem2('Konfeti bazuka',", """  addItem2('M4 tüfek','Triyajda otomatik silah. Hasta güvenliği sorusu sonra sorulur.',{kind:'pistol',gun:1,pw:2,spread:.014,cd:.11,col:0xffa000},function(g){box(.04,.09,.06,Lm(0x2b2b2b),0,-.05,.08,g);box(.05,.06,.5,Lm(0x3a3a3a),0,.01,-.04,g);box(.02,.02,.2,Lm(0x222222),0,.02,-.38,g);var f=sph(.05,Bm(0xfff2a0),0,.02,-.5,g);f.visible=false;g.userData.flash=f});S.items[S.items.length-1].obj.rotation.x=-.42;S.items[S.items.length-1].obj.position.set(.0,-.03,-.2);
+  addItem2('Bıçak','Karambit. Sadece konservatif tedavi için.',{kind:'melee',pw:3,col:0xcfd8dc,ds:.02,cd:.3,hit:['Hasta “bu steril mi?” diye sordu.','Çentik! Hasta geri çekildi.']},function(g){var b=box(.012,.03,.2,Lm(0xc9d1d6),0,0,-.1,g);b.rotation.x=.1;box(.02,.025,.1,Lm(0x2e3b2a),0,0,.05,g)});S.items[S.items.length-1].obj.rotation.x=-.3;
+  addItem2('Konfeti bazuka',""")
+
 # decoUp: phong metal; moto vb. başka yuvalar sonraki adımda eklenecek
 open(dst, 'w', encoding='utf8').write(h)
 print('tamam:', dst)
