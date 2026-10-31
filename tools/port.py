@@ -192,7 +192,7 @@ rep("  floorText('DOKTOR',2.1,.55,'#b0306f',8.6,-.7,0);\n", "")
 
 # --- 11) hazır (CC-BY) insan modelleri: erkek yetişkin hastalara varyasyon olarak ---
 rep("function makePatient(enc,lookKey){var p={n:++S.pn,enc:enc,age:(enc.age>10&&!enc.vk)?enc.age+Math.round(rnd(-3,3)):enc.age,g:makePerson(withFace(randLook(lookKey||enc.look),enc)),",
-    "function pickVar(L,enc){try{var R=ABG.rig;if(!R||L.bird||L.extra)return L;var f=enc.sex==='Kadın';if(R.vready&&(enc.sex==='Erkek'||f)&&enc.age>=20&&enc.age<=68&&Math.random()<.45){var n=0;P.forEach(function(q){if(q.g&&q.g.userData.rig&&q.g.userData.rig.variant)n++});if(n<(MOB?3:7)){var vk=R.vpick(f);if(vk){L.rig=1;L.variant=vk;return L}}}L.rig=1;L.fem=f?1:0;L.age=enc.age;if(f)L.hairStyle=enc.age>62?'bun':pick(['ponytail','bun','long','long','scarf']);else{L.hairStyle=(enc.age>58&&Math.random()<.5)?'bald':'short';if(enc.age>24&&Math.random()<.22)L.stache=1}if(enc.age<=12&&!L.scale)L.scale=.62}catch(e){}return L}\nfunction makePatient(enc,lookKey){var p={n:++S.pn,enc:enc,age:(enc.age>10&&!enc.vk)?enc.age+Math.round(rnd(-3,3)):enc.age,g:makePerson(pickVar(withFace(randLook(lookKey||enc.look),enc),enc)),")
+    "function pickVar(L,enc){try{var R=ABG.rig;if(!R||L.bird||L.extra)return L;var f=enc.sex==='Kadın';if(R.vready&&(enc.sex==='Erkek'||f)&&enc.age>=15&&enc.age<=78&&Math.random()<.9){var n=0;P.forEach(function(q){if(q.g&&q.g.userData.rig&&q.g.userData.rig.variant)n++});if(n<(MOB?5:12)){var vk=R.vpick(f);if(vk){L.rig=1;L.variant=vk;return L}}}L.rig=1;L.fem=f?1:0;L.age=enc.age;if(f)L.hairStyle=enc.age>62?'bun':pick(['ponytail','bun','long','long','scarf']);else{L.hairStyle=(enc.age>58&&Math.random()<.5)?'bald':'short';if(enc.age>24&&Math.random()<.22)L.stache=1}if(enc.age<=12&&!L.scale)L.scale=.62}catch(e){}return L}\nfunction makePatient(enc,lookKey){var p={n:++S.pn,enc:enc,age:(enc.age>10&&!enc.vk)?enc.age+Math.round(rnd(-3,3)):enc.age,g:makePerson(pickVar(withFace(randLook(lookKey||enc.look),enc),enc)),")
 
 
 # --- 12) POV kolları referansa göre: daha yukarı, daha büyük, ağzı görünür ---
@@ -300,6 +300,10 @@ rep("/* ---------- 6) KIRMIZI ALAN: yaratıcı vakalar + mini oyunlar ----------
 # --- 24) ruh hali yüz ifadeleri ---
 _mdjs = open(__import__('os').path.join(__import__('os').path.dirname(__import__('os').path.abspath(__file__)), 'mood.js'), encoding='utf8').read()
 rep("/* ---------- 6) KIRMIZI ALAN: yaratıcı vakalar + mini oyunlar ---------- */", _mdjs + "/* ---------- 6) KIRMIZI ALAN: yaratıcı vakalar + mini oyunlar ---------- */")
+
+# --- 25) parlak zemin yansıması (küp harita) ---
+_rfjs = open(__import__('os').path.join(__import__('os').path.dirname(__import__('os').path.abspath(__file__)), 'reflect.js'), encoding='utf8').read()
+rep("/* ---------- 6) KIRMIZI ALAN: yaratıcı vakalar + mini oyunlar ---------- */", _rfjs + "/* ---------- 6) KIRMIZI ALAN: yaratıcı vakalar + mini oyunlar ---------- */")
 
 # decoUp: phong metal; moto vb. başka yuvalar sonraki adımda eklenecek
 open(dst, 'w', encoding='utf8').write(h)

@@ -1248,7 +1248,7 @@ function freeSeat(){var a=seats.filter(function(s){return !s.taken});return a.le
 function newBar(){var g=new THREE.Group();var bg=box(.6,.07,.02,Bm(0x111111),0,0,0,g);var fl=box(.56,.045,.03,Bm(0x34d58a),0,0,.01,g);g.userData.fl=fl;g.userData.noHit=true;scene.add(g);return g}
 var SKINS=[0xe8b898,0xe0ac84,0xd4a07e,0xc68863,0x9c6a4a,0x7a4e36],SHIRTS=[0xc9d6df,0x7a8f6a,0xe56fa0,0x6a5acd,0xd4a15a,0x4f8fbf,0x9c4f4f,0x3a3f45,0xe3e3df],HAIRS=[0x2b1d14,0x3b2a1f,0x111111,0x5b4636,0x8a5a2b],RSK=['karpuz','yasli','terli','cocuk','telefon','kirik','drama','yaslitv','canta','boks','tavuk','ofkeli'],NOSKIN=['penguen','uzayli','robot','dino','horoz','pasta','guvercin'];
 function randLook(key){var L=Object.assign({},LOOKS[key]);if(L.bird)return L;if(NOSKIN.indexOf(key)<0)L.skin=pick(SKINS);if(RSK.indexOf(key)>=0)L.shirt=pick(SHIRTS);if(L.hair&&key!=='yasli'&&key!=='yaslitv')L.hair=pick(HAIRS);return L}
-function pickVar(L,enc){try{var R=ABG.rig;if(!R||L.bird||L.extra)return L;var f=enc.sex==='Kadın';if(R.vready&&(enc.sex==='Erkek'||f)&&enc.age>=20&&enc.age<=68&&Math.random()<.45){var n=0;P.forEach(function(q){if(q.g&&q.g.userData.rig&&q.g.userData.rig.variant)n++});if(n<(MOB?3:7)){var vk=R.vpick(f);if(vk){L.rig=1;L.variant=vk;return L}}}L.rig=1;L.fem=f?1:0;L.age=enc.age;if(f)L.hairStyle=enc.age>62?'bun':pick(['ponytail','bun','long','long','scarf']);else{L.hairStyle=(enc.age>58&&Math.random()<.5)?'bald':'short';if(enc.age>24&&Math.random()<.22)L.stache=1}if(enc.age<=12&&!L.scale)L.scale=.62}catch(e){}return L}
+function pickVar(L,enc){try{var R=ABG.rig;if(!R||L.bird||L.extra)return L;var f=enc.sex==='Kadın';if(R.vready&&(enc.sex==='Erkek'||f)&&enc.age>=15&&enc.age<=78&&Math.random()<.9){var n=0;P.forEach(function(q){if(q.g&&q.g.userData.rig&&q.g.userData.rig.variant)n++});if(n<(MOB?5:12)){var vk=R.vpick(f);if(vk){L.rig=1;L.variant=vk;return L}}}L.rig=1;L.fem=f?1:0;L.age=enc.age;if(f)L.hairStyle=enc.age>62?'bun':pick(['ponytail','bun','long','long','scarf']);else{L.hairStyle=(enc.age>58&&Math.random()<.5)?'bald':'short';if(enc.age>24&&Math.random()<.22)L.stache=1}if(enc.age<=12&&!L.scale)L.scale=.62}catch(e){}return L}
 function makePatient(enc,lookKey){var p={n:++S.pn,enc:enc,age:(enc.age>10&&!enc.vk)?enc.age+Math.round(rnd(-3,3)):enc.age,g:makePerson(pickVar(withFace(randLook(lookKey||enc.look),enc),enc)),state:'walk',patience:enc.pat||90,max:enc.pat||90,busy:false,t:0,bar:null};scene.add(p.g);p.g.userData.pat=p;P.push(p);return p}
 function waiting(){return P.filter(function(p){return p.state==='wait'})}
 function spawnWalker(enc){var seat=freeSeat();if(!seat)return false;seat.taken=true;var p=makePatient(enc);p.seat=seat;p.g.position.set(25,0,rnd(6.6,7.4));p.via=[{x:18.6,z:7},{x:15.6,z:7}];p.target={x:seat.x,z:seat.z};p.bar=newBar();p.bar.visible=false;return true}
@@ -4461,6 +4461,17 @@ else if(p.state==='bed'||p.state==='await')e=(p.n%3===0)?'sleepy':'pain';
 else if(p.state==='chase'||p.state==='alarm')e='surprised';
 if(e)ABG.rig.express(p.g,e,1.2)});
 [ECEW,HUS,CLN].forEach(function(w){if(w&&w.g&&w.g.userData&&w.g.userData.rig&&Math.random()<.12)ABG.rig.express(w.g,Math.random()<.7?'smile':'worry',2.2)})}catch(e){}};
+/* ---------- parlak zemin: tavan ışıklarını/duvarları yansıtan küp harita (bir kez çekilir) ---------- */
+var RFL={done:false,t:0};
+var _gfRf=gfxFrame;gfxFrame=function(dt){_gfRf(dt);try{if(RFL.done||MOB||GFX.q==='low'||S.mode!=='play')return;RFL.t+=dt;if(RFL.t<2.5)return;RFL.done=true;
+var fl=null;scene.children.forEach(function(o){if(fl||!o.isMesh||!o.geometry||o.geometry.type!=='PlaneGeometry')return;var p=o.geometry.parameters;if(p.width===34&&p.height===22&&o.rotation.x<0&&o.material&&o.material.map&&o.material.isMeshPhongMaterial)fl=o});
+if(!fl)return;
+var rt=new THREE.WebGLCubeRenderTarget(256,{generateMipmaps:true,minFilter:THREE.LinearMipmapLinearFilter}),cc=new THREE.CubeCamera(.1,60,rt);cc.position.set(0,1.1,0);
+var hid=[];scene.traverse(function(o){if(o.isMesh&&(o.userData.rig||o.isSkinnedMesh||(o.parent&&o.parent.userData&&o.parent.userData.rig))&&o.visible){o.visible=false;hid.push(o)}});
+fl.visible=false;cc.update(renderer,scene);fl.visible=true;hid.forEach(function(o){o.visible=true});
+var old=fl.material,m=new THREE.MeshStandardMaterial({map:old.map,roughness:.34,metalness:.0,envMap:rt.texture,envMapIntensity:.42});
+fl.material=m;
+}catch(e){RFL.err=e}};
 /* ---------- 6) KIRMIZI ALAN: yaratıcı vakalar + mini oyunlar ---------- */
 var RGC=[
  {key:'rg_pnx',rg:'needle',age:24,sex:'Erkek',look:'kirik',cc:'Nefes darlığı, göğüs travması',vit:[136,'78/42',84,36.4],absurd:'Gidon göğsüne saplanan motokurye',
