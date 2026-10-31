@@ -643,6 +643,8 @@
   function attachHand(arm) {
     if (arm.hand || !R.handScene) return; var h = R.handScene.clone(true);
     h.traverse(function (o) { if (o.isMesh) { var m = o.material; o.material = new THREE.MeshStandardMaterial({ map: m.map, color: 0xffffff, roughness: .6, metalness: 0, envMapIntensity: ABG.envI || .25 }); o.castShadow = false; o.renderOrder = 3; o.frustumCulled = false; } });
+    var ms = []; h.traverse(function (o) { if (o.isMesh) ms.push(o); }); ms.sort(function (a, b) { return b.geometry.attributes.position.count - a.geometry.attributes.position.count; });
+    for (var k = 1; k < ms.length; k++) ms[k].visible = false; /* tek el: ikinci (iç) parça gizlenir */
     h.position.set(0, 0, .002); h.scale.setScalar(R.handScale || .95); if (arm.sx > 0) h.scale.x *= -1;
     arm.bones[arm.idx.wrist].add(h); arm.hand = h; arm.meshH.visible = false;
   }

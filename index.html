@@ -4216,13 +4216,13 @@ var CTX=[ /* [regex, bölge, tanı, açıklama] */
  [/pnömoni|zatürre|ateş|öksürük|balgam/i,'chest','pna','BT: sağ alt lobda konsolidasyon ve hava bronkogramı (pnömoni).'],
  [/plevral|sıvı|kanser/i,'chest','eff','BT: bilateral posterior plevral sıvı ve kompresif atelektazi.'],
  [/göğüs|nefes|çarpıntı|kalp|kriz/i,'chest','','Toraks BT: akciğer parankimi, mediasten ve büyük damarlar normal.']];
-function pcInfo(p){if(!p)return {hr:76,mode:'normal',ecgCap:ECGCAP.normal,kind:'chest',dx:'',ctCap:'Örnek: normal toraks BT.',abn:false};if(p._pci&&p._pci.hr===pcHr(p))return p._pci;
+function pcInfo(p){if(!p)return {hr:76,mode:'normal',ecgCap:'',kind:'chest',dx:'',ctCap:'',abn:false,has:false};if(p._pci&&p._pci.hr===pcHr(p))return p._pci;
   var e=p.enc||{},tx=[e.key,e.cc,e.absurd,e.quote,e.story].join(' '),hr=pcHr(p),m=p.ecgMode||'';
   if(!m){if(/hiperkalemi|potasyum/i.test(tx))m='hyperk';else if(/hipokalemi/i.test(tx))m='hypok';else if(/perikardit/i.test(tx))m='perik';else if(/emboli|uzun uçuş/i.test(tx))m='pe';else if(/wpw|preeksit/i.test(tx))m='wpw';else if(/uzun qt|torsad/i.test(tx))m='long';else if(/hipotermi|donma/i.test(tx))m='osborn';else if(/göğüs ağr|kalp krizi|infarkt|kolumun|sol kol|baskı/i.test(tx))m='st';else if(/çarpıntı/i.test(tx))m='svt';else if(/AV blok|bayıl.*yavaş/i.test(tx))m='av3';else m='normal'}
   if(m==='brady')m='av3';if(m==='svt'&&hr<150)hr=180;if(m==='osborn')hr=Math.min(hr,44);
   var kind='chest',dx='',cap='Nonkontrast BT: akut patoloji saptanmadı.';for(var i=0;i<CTX.length;i++)if(CTX[i][0].test(tx)){kind=CTX[i][1];dx=CTX[i][2];cap=CTX[i][3];break}
   if(!dx&&p.trauma){kind='abd';dx='a_dal';cap=CTX[14][3]}
-  return (p._pci={hr:pcHr(p),ehr:hr,mode:m,ecgCap:ECGCAP[m]||ECGCAP.normal,kind:kind,dx:dx,ctCap:cap,abn:!!dx})}
+  return (p._pci={hr:pcHr(p),ehr:hr,mode:m,ecgCap:ECGCAP[m]||ECGCAP.normal,kind:kind,dx:dx,ctCap:cap,abn:!!dx,has:!!(p.ecgMode||m!=='normal'||dx)})}
 /* ---- BT çizimi: hiperdens = parlak (taze kan, kontrast, kemik), hipodens = koyu (ödem, sıvı, iskemi), hava = siyah ---- */
 function ctDraw(x,W,H,kind,dx,slice){x.fillStyle='#000';x.fillRect(0,0,W,H);var cx=W/2,cy=H/2,s=(kind==='head')?Math.min(W,H)/2:Math.min(W/3.05,H/2),k=1+Math.sin(slice*.7)*.04,sd=slice*977+7;function rn(){sd=(sd*9301+49297)%233280;return sd/233280}
   function el(a,b,rx,ry,col,rot){x.fillStyle=col;x.beginPath();x.ellipse(cx+a,cy+b,Math.max(1,rx),Math.max(1,ry),rot||0,0,7);x.fill()}
@@ -4265,6 +4265,7 @@ function ctDraw(x,W,H,kind,dx,slice){x.fillStyle='#000';x.fillRect(0,0,W,H);var 
     else if(dx==='edm'){el(-s*.5,0,s*.28,s*.4,'rgba(190,190,190,.45)');el(s*.5,0,s*.28,s*.4,'rgba(190,190,190,.45)')}
     else if(dx==='eff'){el(-s*.62,s*.32,s*.45,s*.26,'rgba(105,105,105,.95)',-.08);el(s*.62,s*.32,s*.45,s*.26,'rgba(105,105,105,.95)',.08)}}
   for(var n=0;n<240;n++){x.fillStyle='rgba(255,255,255,'+(rn()*.06).toFixed(3)+')';x.fillRect(rn()*W,rn()*H,1.5,1.5)}}
+function splash(x,W,H,t){x.fillStyle='#0a2540';x.fillRect(0,0,W,H);x.fillStyle='#12406b';x.fillRect(0,H*.62,W,H*.38);x.fillStyle='#e8f1fa';x.fillRect(W/2-9,H*.14,18,54);x.fillRect(W/2-27,H*.14+18,54,18);x.textAlign='center';x.font='bold '+Math.round(H*.13)+'px sans-serif';x.fillText('MARVARD ACİL',W/2,H*.5);x.font=Math.round(H*.065)+'px sans-serif';x.fillStyle='#9cc4e8';x.fillText('Acil Servis Bilgi Sistemi',W/2,H*.6);if(((t*1.5)|0)%2){x.fillStyle='#7fe0ff';x.fillRect(W/2-5,H*.8,10,14)}x.textAlign='left'}
 function pcDraw(o,t){var x=o.x,W=512,H=300;
   if(o.kind==='tri'){x.fillStyle='#0b2a3a';x.fillRect(0,0,W,H);x.fillStyle='#124b66';x.fillRect(0,0,W,36);x.fillStyle='#fff';x.font='bold 22px sans-serif';x.fillText('TRİYAJ KAYIT · BEKLEYENLER',12,26);
     var l=P.filter(function(p){return p.state==='wait'||p.state==='walk'||p.state==='bed'}).slice(0,8);x.font='19px monospace';
@@ -4274,17 +4275,18 @@ function pcDraw(o,t){var x=o.x,W=512,H=300;
     var fr=0,tt=0;try{beds.forEach(function(b){tt++;if(!b.busy)fr++})}catch(e){}var wc=0;try{wc=waiting().length}catch(e){}
     x.font='24px monospace';x.fillStyle='#bff5d0';x.fillText('Boş yatak : '+fr+' / '+tt,16,84);x.fillText('Bekleyen  : '+wc,16,122);x.fillText('Puan      : '+Math.round(S.score||0),16,160);
     x.strokeStyle='#2fe28a';x.lineWidth=2;x.beginPath();for(var i=0;i<W-30;i++){var yy=230-Math.sin(i*.05+t*3)*8*Math.sin(i*.011+t);if(i===0)x.moveTo(15,yy);else x.lineTo(15+i,yy)}x.stroke()}
+  else if(!pcInfo(pcCur()).has){splash(x,W,H,t)}
   else{var p=pcCur(),I=pcInfo(p),hr=I.ehr||I.hr,md=I.mode;x.fillStyle='#071a14';x.fillRect(0,0,W,H);x.fillStyle='#1b5e3b';x.fillRect(0,0,W,34);x.fillStyle='#fff';x.font='bold 20px sans-serif';x.fillText(p?('Hasta '+p.n+(p.name?' · '+p.name:'')):'POLİKLİNİK · HASTA BEKLENİYOR',10,24);
     ecgBand(x,10,44,300,100,md,hr,t,2,0,'II');ecgBand(x,10,148,300,70,md,hr,t,1.5,.18,'V5');
     x.save();x.translate(322,44);x.beginPath();x.rect(0,0,180,174);x.clip();ctDraw(x,180,174,I.kind,I.dx,10);x.restore();
     x.fillStyle='#ffd23f';x.font='18px monospace';x.fillText('HR '+hr+'  '+(md==='normal'?'SİNÜS':md.toUpperCase()),12,246);x.fillStyle='#9fd8b0';x.fillText(p?('Şikâyet: '+(((p.enc&&p.enc.cc)||'').slice(0,34))):'Yakından bak: [E]',12,274);x.fillStyle='#9fd8b0';x.fillText('BT '+I.kind.toUpperCase()+(I.dx?' ●':''),330,246)}
   o.t.needsUpdate=true}
-function pczDraw(t,full){var p=PCZ.p,E=$('#pczE'),C=$('#pczC');if(!E||!C)return;var I=pcInfo(p),hr=I.ehr||I.hr,md=I.mode,x=E.getContext('2d'),W=E.width,H=E.height;
+function pczDraw(t,full){var p=PCZ.p,E=$('#pczE'),C=$('#pczC');if(!E||!C)return;var I=pcInfo(p),hr=I.ehr||I.hr,md=I.mode,x=E.getContext('2d'),W=E.width,H=E.height;if(!I.has){splash(x,W,H,t);if(full||PCZ.ctDirty){PCZ.ctDirty=false;var c0=C.getContext('2d');c0.fillStyle='#000';c0.fillRect(0,0,C.width,C.height);c0.fillStyle='#9cc4e8';c0.font='20px sans-serif';c0.textAlign='center';c0.fillText('Görüntüleme istenmedi',C.width/2,C.height/2);c0.textAlign='left'}return}
   [['II',0,0],['V2',1,.22],['V5',2,.4]].forEach(function(a){var h=(H-4)/3,y0=a[1]*h+a[1]*2;ecgBand(x,0,y0,W,h,md,hr,t,2.4,a[2],a[0]);x.fillStyle='#ffd23f';x.font='18px monospace';x.fillText(a[0],8,y0+20)});x.fillStyle='#ffd23f';x.font='20px monospace';x.fillText('HR '+hr+'  '+(md==='normal'?'SİNÜS':md.toUpperCase()),W-210,26);
   if(full||PCZ.ctDirty){PCZ.ctDirty=false;var c=C.getContext('2d');ctDraw(c,C.width,C.height,I.kind,I.dx,PCZ.slice);c.fillStyle='#9fd8b0';c.font='18px monospace';c.fillText('BT '+I.kind.toUpperCase()+' · kesit '+PCZ.slice+'/20',10,24)}}
 function pczLayout(){var g=$('#pczG'),E=$('#pczE'),C=$('#pczC');g.style.gridTemplateColumns=PCZ.zoom?'1fr':'repeat(auto-fit,minmax(280px,1fr))';E.style.display=PCZ.zoom==='c'?'none':'';C.style.display=PCZ.zoom==='e'?'none':'';$('#pczH').textContent=PCZ.zoom?'Küçültmek için tekrar tıkla.':'Ekrana tıklayarak yakınlaştır · BT üzerinde tekerlek/kaydırıcı = kesit.'}
 function pczOpen(){var p=pcCur();PCZ.p=p;PCZ.zoom=null;PCZ.slice=10;PCZ.ctDirty=true;S.mode='ui';unlock();show('#prompt',false);show('#pcz',true);PCZ.on=true;$('#pczS').value=10;
-  $('#pczT').textContent=p?('Hasta '+p.n+(p.name?' · '+p.name:'')+' · EKG ve Tomografi'):'Bilgisayar · örnek EKG ve BT (masada hasta yok)';var I=pcInfo(p);$('#pczI').innerHTML='<b>EKG:</b> '+I.ecgCap+'<br><b>BT:</b> '+I.ctCap;pczLayout();pczDraw(S.t||0,true)}
+  $('#pczT').textContent=p?('Hasta '+p.n+(p.name?' · '+p.name:'')+(pcInfo(p).has?' · EKG ve Tomografi':' · Marvard Acil')):'Marvard Acil · Bilgi Sistemi';var I=pcInfo(p);$('#pczI').innerHTML=I.has?'<b>EKG:</b> '+I.ecgCap+'<br><b>BT:</b> '+I.ctCap:'Bu hasta için özel EKG ya da görüntüleme sonucu yok.';pczLayout();pczDraw(S.t||0,true)}
 function pczClose(){if(!PCZ.on)return;PCZ.on=false;show('#pcz',false);S.mode='play';lock()}
 (function(){var E=$('#pczE'),C=$('#pczC');if(!E)return;E.addEventListener('click',function(){PCZ.zoom=PCZ.zoom?null:'e';pczLayout()});C.addEventListener('click',function(){PCZ.zoom=PCZ.zoom?null:'c';pczLayout()});
   C.addEventListener('wheel',function(e){e.preventDefault();PCZ.slice=clamp(PCZ.slice+(e.deltaY>0?1:-1),1,20);$('#pczS').value=PCZ.slice;PCZ.ctDirty=true},{passive:false});
