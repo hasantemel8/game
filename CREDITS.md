@@ -24,3 +24,5 @@ Bu üç model Creative Commons Attribution 4.0 lisansıyla paylaşılmıştır (
 - **Indian Man in suit** — Pixel_Monster — https://sketchfab.com/3d-models/indian-man-in-suit-985dd9756d89464b9380414b5b12d8aa → `models/patient_suit.glb`
 - **Full Body Scan - Clean Pose** — OverseerThuror — https://sketchfab.com/3d-models/full-body-scan-clean-pose-ae9559912f6240a8a87057911b69edd0 → `models/patient_hoodie.glb`
 - **Ryan full body scan** — FletchTech — https://sketchfab.com/3d-models/ryan-full-body-scan-d0b560123d06492aa7bf9e5361642811 → `models/patient_tee.glb`
+- **Anna** — Trevon896850541 (CC-BY 4.0) — https://sketchfab.com/3d-models/anna-087e5e108dfd43af869e1ea6889014d0 → `models/patient_anna.glb`
+- **Full body 3D scan** — fablabbudapest (CC-BY 4.0) — https://sketchfab.com/3d-models/full-body-3d-scan-c531fb928a5c408286a1ab7d9e18958e → `models/patient_scanf.glb`

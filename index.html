@@ -836,10 +836,10 @@ function build(){
 
   /* kamera elleri + kupa */
   var sleeve=Lm(0xf4f6f6),skin=Lm(0xe0ac84);
-  var armR=new THREE.Group();box(.14,.14,.55,sleeve,0,0,.1,armR);sph(.07,skin,0,0,-.2,armR);armR.position.set(.33,-.34,-.38);armR.rotation.set(.25,.25,0);camera.add(armR);try{ABG.rig.makeArm(armR,0xe0ac84,0xf4f6f6,1)}catch(e){console.warn('kol hata',e)}
+  var armR=new THREE.Group();box(.14,.14,.55,sleeve,0,0,.1,armR);sph(.07,skin,0,0,-.2,armR);armR.position.set(.34,-.26,-.40);armR.rotation.set(.42,.22,0);camera.add(armR);try{ABG.rig.makeArm(armR,0xe0ac84,0xf4f6f6,1)}catch(e){console.warn('kol hata',e)}
   var mugT=cvs(256,128),mx=mugT.getContext('2d');mx.fillStyle='#e8e8e2';mx.fillRect(0,0,256,128);mx.fillStyle='#222';mx.textAlign='center';mx.font='bold 21px sans-serif';mx.fillText('DAHA KAÇ HASTA',128,38);mx.fillText('GELEBİLİR Kİ?',128,66);mx.font='26px sans-serif';mx.fillText('☺',128,104);
   var mug=new THREE.Mesh(new THREE.CylinderGeometry(.075,.065,.12,16),[Lm(0xe8e8e2),Lm(0x3a2312),Lm(0xe8e8e2)]);mug.material[0]=new THREE.MeshLambertMaterial({map:new THREE.CanvasTexture(mugT)});mug.position.set(.01,.02,-.26);armR.add(mug);
-  var armL=new THREE.Group();box(.14,.14,.55,sleeve,0,0,.1,armL);sph(.07,skin,0,0,-.2,armL);armL.position.set(-.33,-.36,-.38);armL.rotation.set(.2,-.25,0);camera.add(armL);try{ABG.rig.makeArm(armL,0xe0ac84,0xf4f6f6,-1)}catch(e){console.warn('kol hata',e)}
+  var armL=new THREE.Group();box(.14,.14,.55,sleeve,0,0,.1,armL);sph(.07,skin,0,0,-.2,armL);armL.position.set(-.34,-.28,-.40);armL.rotation.set(.40,-.22,0);camera.add(armL);try{ABG.rig.makeArm(armL,0xe0ac84,0xf4f6f6,-1)}catch(e){console.warn('kol hata',e)}
   S.armR=armR;S.armL=armL;S.items=[{n:'Kahve kupası',obj:mug,line:'Klasik. Kahve hâlâ sıcak.',rx:'',fx:[0,0]}];S.item=0;
   function addItem(n,line,rx,fx,fn){var g=new THREE.Group();fn(g);PR.slot('item_'+n.toLowerCase().replace(/ğ/g,'g').replace(/ü/g,'u').replace(/ş/g,'s').replace(/ı/g,'i').replace(/ö/g,'o').replace(/ç/g,'c').replace(/[^a-z0-9]+/g,'_'),g.children.slice(),0,0,0,0,g);g.position.set(.01,.02,-.26);g.visible=false;armR.add(g);S.items.push({n:n,obj:g,line:line,rx:rx,fx:fx})}
   var steel=Lm(0xd8e0e3,{emissive:0x2a3033});
@@ -1242,7 +1242,7 @@ function freeSeat(){var a=seats.filter(function(s){return !s.taken});return a.le
 function newBar(){var g=new THREE.Group();var bg=box(.6,.07,.02,Bm(0x111111),0,0,0,g);var fl=box(.56,.045,.03,Bm(0x34d58a),0,0,.01,g);g.userData.fl=fl;g.userData.noHit=true;scene.add(g);return g}
 var SKINS=[0xe8b898,0xe0ac84,0xd4a07e,0xc68863,0x9c6a4a,0x7a4e36],SHIRTS=[0xc9d6df,0x7a8f6a,0xe56fa0,0x6a5acd,0xd4a15a,0x4f8fbf,0x9c4f4f,0x3a3f45,0xe3e3df],HAIRS=[0x2b1d14,0x3b2a1f,0x111111,0x5b4636,0x8a5a2b],RSK=['karpuz','yasli','terli','cocuk','telefon','kirik','drama','yaslitv','canta','boks','tavuk','ofkeli'],NOSKIN=['penguen','uzayli','robot','dino','horoz','pasta','guvercin'];
 function randLook(key){var L=Object.assign({},LOOKS[key]);if(L.bird)return L;if(NOSKIN.indexOf(key)<0)L.skin=pick(SKINS);if(RSK.indexOf(key)>=0)L.shirt=pick(SHIRTS);if(L.hair&&key!=='yasli'&&key!=='yaslitv')L.hair=pick(HAIRS);return L}
-function pickVar(L,enc){try{var R=ABG.rig;if(!R||!R.vready||L.bird||L.extra||enc.sex!=='Erkek'||enc.age<20||enc.age>68||Math.random()>.45)return L;var n=0;P.forEach(function(q){if(q.g&&q.g.userData.rig&&q.g.userData.rig.variant)n++});if(n>=(MOB?3:7))return L;L.rig=1;L.variant=pick(R.vlist)}catch(e){}return L}
+function pickVar(L,enc){try{var R=ABG.rig;if(!R||!R.vready||L.bird||L.extra||(enc.sex!=='Erkek'&&enc.sex!=='Kadın')||enc.age<20||enc.age>68||Math.random()>.45)return L;var n=0;P.forEach(function(q){if(q.g&&q.g.userData.rig&&q.g.userData.rig.variant)n++});if(n>=(MOB?3:7))return L;var vk=R.vpick(enc.sex==='Kadın');if(!vk)return L;L.rig=1;L.variant=vk}catch(e){}return L}
 function makePatient(enc,lookKey){var p={n:++S.pn,enc:enc,age:(enc.age>10&&!enc.vk)?enc.age+Math.round(rnd(-3,3)):enc.age,g:makePerson(pickVar(withFace(randLook(lookKey||enc.look),enc),enc)),state:'walk',patience:enc.pat||90,max:enc.pat||90,busy:false,t:0,bar:null};scene.add(p.g);p.g.userData.pat=p;P.push(p);return p}
 function waiting(){return P.filter(function(p){return p.state==='wait'})}
 function spawnWalker(enc){var seat=freeSeat();if(!seat)return false;seat.taken=true;var p=makePatient(enc);p.seat=seat;p.g.position.set(25,0,rnd(6.6,7.4));p.via=[{x:18.6,z:7},{x:15.6,z:7}];p.target={x:seat.x,z:seat.z};p.bar=newBar();p.bar.visible=false;return true}
@@ -3183,7 +3183,7 @@ function applyCamera(){var st=S.mode==='play'&&S.stress>100&&S.shake?(S.stress-1
   if(S.faint>0)camera.rotation.x=1.15;
   if(SLIP.roll){camera.rotation.z+=SLIP.roll;camera.rotation.x-=Math.abs(SLIP.roll)*.5}
   if(S.kick>0){camera.rotation.z+=Math.sin(S.t*60)*.02*S.kick;camera.rotation.x+=S.kick*.01*Math.sin(S.t*47);S.kick=Math.max(0,S.kick-.03)}
-  if(S.armR){var cit=S.items[S.item];S.swing=Math.max(0,S.swing-.09);S.armR.rotation.x=.25+S.swing*(cit&&cit.gun?.45:-1.15);S.armR.position.y=-.34+(S.moving?Math.sin(S.bob*2)*.012:0)+Math.sin(S.t*1.4)*.003;S.armL.position.y=-.36+(S.moving?Math.cos(S.bob*2)*.012:0)}}
+  if(S.armR){var cit=S.items[S.item];S.swing=Math.max(0,S.swing-.09);S.armR.rotation.x=.42+S.swing*(cit&&cit.gun?.45:-1.15);S.armR.position.y=-.26+(S.moving?Math.sin(S.bob*2)*.012:0)+Math.sin(S.t*1.4)*.003;S.armL.position.y=-.28+(S.moving?Math.cos(S.bob*2)*.012:0)}}
 
 /* ================= HUD GÜNCELLE ================= */
 var hc={};

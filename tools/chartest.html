@@ -10,13 +10,18 @@ var looks=[{rig:1,fem:1,hairStyle:'ponytail',skin:0xe8b898,shirt:0x2fa7a0,pants:
 {rig:1,fem:1,hairStyle:'scarf',scarf:0xf2a65a,skirt:0x8e3b5f,age:48,skin:0xd9a47e,shirt:0x8e3b5f,pants:0x5a2440,hair:0x2a1a12,iris:'#3d2616'},
 {rig:1,fem:1,hairStyle:'scarf',scarf:0xe8dcc8,skin:0xc99272,shirt:0x2f8f83,pants:0x2f8f83,hair:0x5a3b2a,iris:'#4a2e1c'}];
 var P=[];
-var VAR=[{key:'suit',file:'patient_suit.glb',height:1.78,armDown:1.22},{key:'hoodie',file:'patient_hoodie.glb',height:1.74,rotY:Math.PI/2},{key:'tee',file:'patient_tee.glb',height:1.80}];
+var VAR=[{key:'suit',file:'patient_suit.glb',height:1.78,armDown:1.22},{key:'hoodie',file:'patient_hoodie.glb',height:1.74,rotY:Math.PI/2},{key:'tee',file:'patient_tee.glb',height:1.80},{key:'anna',file:'patient_anna.glb',height:1.68,armDown:1.25,fem:true},{key:'scanf',file:'patient_scanf.glb',height:1.68,rotX:-Math.PI/2,fem:true}];
 var nvar=0;
 var mode=Q.get('m')||'front',T=0;ABG.S={t:0};
 var looks_=looks;
 if(Q.get('v')){looks=VAR.map(function(v,i){return {variant:v.key}});}
 P=looks.map(function(L,i){var g=ABG.rig.make(L);g.position.x=(i-1.5)*1.0;sc.add(g);return g});
-function frame(dt){T+=dt;ABG.S.t=T;
+var povInit=false,armR,armL;
+function pov(dt){if(!povInit){povInit=true;sc.add(cam);cam.fov=70;cam.updateProjectionMatrix();
+ function mk(x,y,rx,ry,sx){var g=new THREE.Group();g.add(new THREE.Mesh(new THREE.BoxGeometry(.14,.14,.55),new THREE.MeshBasicMaterial({color:0xff00ff})));g.position.set(x,y,-.38);g.rotation.set(rx,ry,0);cam.add(g);ABG.rig.makeArm(g,0xe0ac84,0xf4f6f6,sx);return g}
+ armR=mk(.34,-.26,.42,.22,1);armL=mk(-.34,-.28,.40,-.22,-1);cam.position.set(0,1.65,0);cam.rotation.set(-.35,0,0);}
+ ABG.rig.updateArms(dt,Q.get('grip')==='1',T)}
+function frame(dt){T+=dt;ABG.S.t=T;if(mode==='pov'){pov(dt);r.render(sc,cam);return}
  P.forEach(function(g,i){if(mode==='walk'){ABG.rig.walk(g,1.6+i*.3,dt,ABG.S)}else{ABG.rig.relax(g,dt,false,ABG.S,cam,sc)}});
  ABG.rig.update(dt,ABG.S,cam);
  if(mode==='face'){cam.position.set(-1.5+ +(Q.get('i')||0),1.58,1.0);cam.lookAt(-1.5+ +(Q.get('i')||0),1.58,0)}
@@ -25,5 +30,5 @@ function frame(dt){T+=dt;ABG.S.t=T;
  r.render(sc,cam)}
 window.__done=0;
 function go(){for(var k=0;k<40;k++){frame(.05)} window.__done=1}
-if(Q.get('v')){var left=VAR.length;ABG.rig.loadVariants('../models/',VAR,function(){if(--left===0){P.forEach(function(g){sc.remove(g)});P=looks.map(function(L,i){var g=ABG.rig.make(L);g.position.x=(i-1)*1.0;sc.add(g);return g});go()}})}else go();
+if(Q.get('v')){var left=VAR.length;ABG.rig.loadVariants('../models/',VAR,function(){if(--left===0){P.forEach(function(g){sc.remove(g)});P=looks.map(function(L,i){var g=ABG.rig.make(L);g.position.x=(i-2)*1.0;sc.add(g);return g});go()}})}else go();
 </script>

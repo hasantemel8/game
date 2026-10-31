@@ -192,7 +192,15 @@ rep("  floorText('DOKTOR',2.1,.55,'#b0306f',8.6,-.7,0);\n", "")
 
 # --- 11) hazır (CC-BY) insan modelleri: erkek yetişkin hastalara varyasyon olarak ---
 rep("function makePatient(enc,lookKey){var p={n:++S.pn,enc:enc,age:(enc.age>10&&!enc.vk)?enc.age+Math.round(rnd(-3,3)):enc.age,g:makePerson(withFace(randLook(lookKey||enc.look),enc)),",
-    "function pickVar(L,enc){try{var R=ABG.rig;if(!R||!R.vready||L.bird||L.extra||enc.sex!=='Erkek'||enc.age<20||enc.age>68||Math.random()>.45)return L;var n=0;P.forEach(function(q){if(q.g&&q.g.userData.rig&&q.g.userData.rig.variant)n++});if(n>=(MOB?3:7))return L;L.rig=1;L.variant=pick(R.vlist)}catch(e){}return L}\nfunction makePatient(enc,lookKey){var p={n:++S.pn,enc:enc,age:(enc.age>10&&!enc.vk)?enc.age+Math.round(rnd(-3,3)):enc.age,g:makePerson(pickVar(withFace(randLook(lookKey||enc.look),enc),enc)),")
+    "function pickVar(L,enc){try{var R=ABG.rig;if(!R||!R.vready||L.bird||L.extra||(enc.sex!=='Erkek'&&enc.sex!=='Kadın')||enc.age<20||enc.age>68||Math.random()>.45)return L;var n=0;P.forEach(function(q){if(q.g&&q.g.userData.rig&&q.g.userData.rig.variant)n++});if(n>=(MOB?3:7))return L;var vk=R.vpick(enc.sex==='Kadın');if(!vk)return L;L.rig=1;L.variant=vk}catch(e){}return L}\nfunction makePatient(enc,lookKey){var p={n:++S.pn,enc:enc,age:(enc.age>10&&!enc.vk)?enc.age+Math.round(rnd(-3,3)):enc.age,g:makePerson(pickVar(withFace(randLook(lookKey||enc.look),enc),enc)),")
+
+
+# --- 12) POV kolları referansa göre: daha yukarı, daha büyük, ağzı görünür ---
+rep("armR.position.set(.33,-.34,-.38);armR.rotation.set(.25,.25,0);", "armR.position.set(.34,-.26,-.40);armR.rotation.set(.42,.22,0);")
+rep("armL.position.set(-.33,-.36,-.38);armL.rotation.set(.2,-.25,0);", "armL.position.set(-.34,-.28,-.40);armL.rotation.set(.40,-.22,0);")
+rep("S.armR.rotation.x=.25+S.swing*", "S.armR.rotation.x=.42+S.swing*")
+rep("S.armR.position.y=-.34+(", "S.armR.position.y=-.26+(")
+rep("S.armL.position.y=-.36+(", "S.armL.position.y=-.28+(")
 
 # decoUp: phong metal; moto vb. başka yuvalar sonraki adımda eklenecek
 open(dst, 'w', encoding='utf8').write(h)

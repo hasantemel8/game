@@ -58,7 +58,9 @@
   if (ABG.rig && ABG.rig.loadVariants && Q.get('rig') !== '0') ABG.rig.loadVariants(BASE, [
     { key: 'suit',   file: 'patient_suit.glb',   height: 1.78, armDown: 1.22 },
     { key: 'hoodie', file: 'patient_hoodie.glb', height: 1.74, rotY: Math.PI / 2 },
-    { key: 'tee',    file: 'patient_tee.glb',    height: 1.80 }
+    { key: 'tee',    file: 'patient_tee.glb',    height: 1.80 },
+    { key: 'anna',   file: 'patient_anna.glb',   height: 1.68, armDown: 1.25, fem: true },
+    { key: 'scanf',  file: 'patient_scanf.glb',  height: 1.68, rotX: -Math.PI / 2, fem: true }
   ]);
 
   var loader = new THREE.GLTFLoader();
