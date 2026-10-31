@@ -252,6 +252,11 @@ rep("var t=pick(RVT[st]);REV.list.push({n:p.n,s:st,t:t});", "var t=revText(p,st)
 rep("var sm=[srt[0],srt[srt.length-1]].concat(REV.list.length>2?[srt[Math.floor(srt.length/2)]]:[]);", "var sm=shuffle(srt.slice()).slice(0,5).sort(function(a,b){return b.s-a.s});")
 rep("Hasta '+r.n+': '+esc(r.t)+'</div>'", "Hasta '+r.n+(r.c?' <small>('+esc(r.c)+')</small>':'')+': '+esc(r.t)+'</div>'")
 
+
+# --- 18) sesli şikâyet tekrarı yok; poliklinikte ekran zoom'u ---
+rep("p._voxT=S.t;voxStop();setTimeout(function(){voxSay(w.join('. '),p)},280)", "p._vsp=p._vsp||{};w=w.filter(function(l){if(p._vsp[l])return false;p._vsp[l]=1;return true});if(!w.length)return;p._voxT=S.t;voxStop();setTimeout(function(){voxSay(w.join('. '),p)},280)")
+rep("(S.mode==='cine'?-6:0);", "(S.mode==='cine'?-6:0)-(S.pcz?Math.max(0,GFX.fov-28):0);")
+
 # decoUp: phong metal; moto vb. başka yuvalar sonraki adımda eklenecek
 open(dst, 'w', encoding='utf8').write(h)
 print('tamam:', dst)

@@ -141,8 +141,7 @@ function pczClose(){if(!PCZ.on)return;PCZ.on=false;show('#pcz',false);S.mode='pl
   C.addEventListener('wheel',function(e){e.preventDefault();PCZ.slice=clamp(PCZ.slice+(e.deltaY>0?1:-1),1,20);$('#pczS').value=PCZ.slice;PCZ.ctDirty=true},{passive:false});
   $('#pczS').addEventListener('input',function(){PCZ.slice=+this.value;PCZ.ctDirty=true});$('#pczX').addEventListener('click',pczClose);
   addEventListener('keydown',function(e){if(PCZ.on&&(e.code==='Escape'||e.code==='KeyE')){e.preventDefault();e.stopPropagation();pczClose()}},true)})();
-var _bV31=build;build=function(){_bV31();try{pcMake(4.9,1.16,4.35,Math.PI,'tri');pcMake(7.1,1.16,4.35,Math.PI,'tri2');pcMake(POLI.desk.x+.05,.77,POLI.desk.z-.2,Math.PI/2,'poli');
-  fixedTargets.push({pos:V(-5.8,1.1,8.35),r:2.3,label:'Bilgisayar: EKG & tomografi',sub:'Ekranı yakınlaştır',act:pczOpen})}catch(e){if(window.console)console.error(e)}};
+var _bV31=build;build=function(){_bV31();try{pcMake(4.9,1.16,4.35,Math.PI,'tri');pcMake(7.1,1.16,4.35,Math.PI,'tri2');pcMake(POLI.desk.x+.05,.77,POLI.desk.z+.55,Math.PI/2+.5,'poli');}catch(e){if(window.console)console.error(e)}};
 var _gfV31=gfxFrame;gfxFrame=function(dt){_gfV31(dt);try{PCT+=dt;if(PCT>.12){PCT=0;var t=S.t||0;PCS.forEach(function(o){if(Math.hypot(camera.position.x-o.px,camera.position.z-o.pz)<16)pcDraw(o,t)});if(PCZ.on)pczDraw(t,false)}}catch(e){}};
 
 /* ---------- personel gezintisi: hemşire + temizlikçi ---------- */
@@ -161,3 +160,7 @@ var _clnV31=clnTick;clnTick=function(dt){var C=CLN;if(!C.g)return;
 var _gfV32=gfxFrame;gfxFrame=function(dt){_gfV32(dt);try{if(LIVE())nurseTick(dt)}catch(e){}};
 
 ABG.dbg=function(c){return eval(c)};
+function pcZoom(on){if(on&&!S.poli)return;if(on===!!S.pcz)return;S.pcz=on;if(on){PCZ.sy=S.yaw;PCZ.sp=S.pitch;S.yaw=2.12;S.pitch=-.26}else if(PCZ.sy!==undefined){S.yaw=PCZ.sy;S.pitch=PCZ.sp}}
+addEventListener('keydown',function(e){if(e.code==='KeyZ'&&S.mode==='play'&&!e.repeat&&(S.poli||S.pcz))pcZoom(!S.pcz)});
+var _spV33=standPoli;standPoli=function(){if(S.pcz)pcZoom(false);_spV33()};
+var _siV33=sitPoli;sitPoli=function(){var was=S.poli;_siV33();if(!was){POLI.exT=.55;try{toast('Z: bilgisayar ekranına yakınlaş / uzaklaş','')}catch(e){}}};
