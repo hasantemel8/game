@@ -331,6 +331,18 @@ rep("  addItem2('Konfeti bazuka',", """  addItem2('M4 tüfek','Triyajda otomatik
   addItem2('Bıçak','Karambit. Sadece konservatif tedavi için.',{kind:'melee',pw:3,col:0xcfd8dc,ds:.02,cd:.3,hit:['Hasta “bu steril mi?” diye sordu.','Çentik! Hasta geri çekildi.']},function(g){var b=box(.012,.03,.2,Lm(0xc9d1d6),0,0,-.1,g);b.rotation.x=.1;box(.02,.025,.1,Lm(0x2e3b2a),0,0,.05,g)});S.items[S.items.length-1].obj.rotation.x=-.3;
   addItem2('Konfeti bazuka',""")
 
+# --- 30) kitap tabanlı yeni vakalar ---
+_c2 = open(__import__('os').path.join(__import__('os').path.dirname(__import__('os').path.abspath(__file__)), 'cases2.js'), encoding='utf8').read()
+rep("/* ---------- 6) KIRMIZI ALAN: yaratıcı vakalar + mini oyunlar ---------- */", _c2 + "/* ---------- 6) KIRMIZI ALAN: yaratıcı vakalar + mini oyunlar ---------- */")
+
+# --- 31) kolaylaştırma (zombi bölümüne kadar rahat ilerlesin) ---
+rep("p.patience-=dt*(1+S.day*.08)*(S.out?2.2:1)", "p.patience-=dt*(1+S.day*.03)*.72*(S.out?2.2:1)")
+rep("if(S.left>=6)return gameOver(", "if(S.left>=10)return gameOver(")
+rep("if(S.cnt.ex>=3)return gameOver('3 hasta kaybedildi.", "if(S.cnt.ex>=5)return gameOver('5 hasta kaybedildi.")
+rep("if(S.hurt>=8)return gameOver('8 hastayı", "if(S.hurt>=12)return gameOver('12 hastayı")
+rep("if(S.faints>=3)return gameOver(", "if(S.faints>=4)return gameOver(")
+rep("stress:18+(day-1)*6,moral:7,", "stress:12+(day-1)*3,moral:9,")
+
 # decoUp: phong metal; moto vb. başka yuvalar sonraki adımda eklenecek
 open(dst, 'w', encoding='utf8').write(h)
 print('tamam:', dst)

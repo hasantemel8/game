@@ -38,3 +38,5 @@ models/v_*.glb: proje sahibinin eklediği insan modelleri; dokular küçültüld
 
 ## Kullanıcının eklediği ek modeller
 models/fp_arms.glb (FPS kolları), item_m4.glb (M4 tüfek), item_bicak.glb (bıçak), zombie_a.glb / zombie_b.glb (zombiler), ambulance.glb: proje sahibi tarafından sağlandı; dokular küçültüldü. Özgün yazar/lisans bilgisi kaynak sayfalarından kontrol edilmelidir.
+## Vaka içerikleri
+Yeni vakalar (tools/cases2.js), "Case Studies in Emergency Medicine" (Cambridge, 2010) kitabındaki tanılardan esinlenmiştir; metinler ve BT/EKG çizimleri özgündür, kitaptan görsel/metin kopyalanmamıştır.

@@ -7,3 +7,6 @@ var ZMOD={a:null,b:null};
     var w=new THREE.Group();o.scale.setScalar(s);o.position.set(-c.x*s,-bb.min.y*s,-c.z*s);w.add(o);ZMOD[k]=w},undefined,function(){})}
   ld('a','zombie_a.glb',1.8);ld('b','zombie_b.glb',1.78)})();
 function zomVis(){var k=Math.random()<.5?'a':'b',m=ZMOD[k]||ZMOD.a||ZMOD.b;if(!m)return null;var o=new THREE.Group();m.children.forEach(function(c){o.add(c.clone(true))});o.userData.noHit=true;return o}
+
+/* Sprite'lar (hasta etiketleri) sahnedeyken Raycaster.camera null olunca ateş/yakın dövüş hata veriyordu */
+var _crW=castRay;castRay=function(a,b,c){RC.camera=camera;return _crW(a,b,c)};

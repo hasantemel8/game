@@ -70,6 +70,8 @@ function pcInfo(p){if(!p)return {hr:76,mode:'normal',ecgCap:'',kind:'chest',dx:'
   if(!m){if(/hiperkalemi|potasyum/i.test(tx))m='hyperk';else if(/hipokalemi/i.test(tx))m='hypok';else if(/perikardit/i.test(tx))m='perik';else if(/emboli|uzun uçuş/i.test(tx))m='pe';else if(/wpw|preeksit/i.test(tx))m='wpw';else if(/uzun qt|torsad/i.test(tx))m='long';else if(/hipotermi|donma/i.test(tx))m='osborn';else if(/göğüs ağr|kalp krizi|infarkt|kolumun|sol kol|baskı/i.test(tx))m='st';else if(/çarpıntı/i.test(tx))m='svt';else if(/AV blok|bayıl.*yavaş/i.test(tx))m='av3';else m='normal'}
   if(m==='brady')m='av3';if(m==='svt'&&hr<150)hr=180;if(m==='osborn')hr=Math.min(hr,44);
   var kind='chest',dx='',cap='Nonkontrast BT: akut patoloji saptanmadı.';for(var i=0;i<CTX.length;i++)if(CTX[i][0].test(tx)){kind=CTX[i][1];dx=CTX[i][2];cap=CTX[i][3];break}
+  if(e.ct){kind=e.ct[0];dx=e.ct[1];cap=e.ct[2]}
+  if(e.em)m=e.em;
   if(!dx&&p.trauma){kind='abd';dx='a_dal';cap=CTX[14][3]}
   return (p._pci={hr:pcHr(p),ehr:hr,mode:m,ecgCap:ECGCAP[m]||ECGCAP.normal,kind:kind,dx:dx,ctCap:cap,abn:!!dx,has:!!(p.ecgMode||m!=='normal'||dx)})}
 /* ---- BT çizimi: hiperdens = parlak (taze kan, kontrast, kemik), hipodens = koyu (ödem, sıvı, iskemi), hava = siyah ---- */

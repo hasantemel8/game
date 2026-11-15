@@ -40,7 +40,7 @@ chapterOf=function(day){return CHAPT[(day-1)%CHAPT.length]};
 var _mpDis=modPick;modPick=function(){_mpDis();if(S.day>=3&&S.day<=6){MOD={k:'dis'+S.day,n:DNAMES[S.day],d:['','','','Yer sallanıyor.','Isırıklar ve yürüyen ölüler.','Su yükseliyor, elektrik gidip geliyor.','Her şey birden. Sabaha çıkabilir misin?'][S.day],t:0,flip:0}}};
 
 var _nsDis=newShift;newShift=function(){_nsDis();DIS.need=1;DIS.day=S.day;DIS.t=0;DIS.ev=[];DIS.zs=[];DIS.sh=0;DIS.res={};DIS.rpick=0;DIS.fin=0;DIS.fin2=0;DIS.sw=0;DIS.wl=0;DIS.st={quakes:0,zk:0,zt:0,blk:0,flood:0,imp:0};
-  DIS.pf=[1,1,1,.85,.8,.75,.7][Math.min(S.day,6)]||.7;DIS.gap=[1,1,1,.65,.6,.55,.5][Math.min(S.day,6)]||.5;if(S.day>6){DIS.pf=.7;DIS.gap=.5}
+  DIS.pf=[1,1,1,.95,.9,.82,.75][Math.min(S.day,6)]||.75;DIS.gap=[1,1,1,.85,.8,.7,.6][Math.min(S.day,6)]||.6;if(S.day>6){DIS.pf=.75;DIS.gap=.6}
   if(DIS.water){scene.remove(DIS.water);DIS.water=null}};
 
 /* ---- hasta sabrı ve geliş sıklığı ---- */
