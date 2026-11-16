@@ -1280,7 +1280,7 @@ function spawnBed(enc,fast){var b=freeBed(false);if(!b)return false;var p=makePa
 function spawnTrauma(){var b=freeBed(true);if(!b)return false;var p=makePatient(Object.assign({pat:999,look:'trauma'},TRAUMA,pick(TQ)),'trauma');p.trauma=true;b.busy=true;p.bed=b;p.state='transit';startIn(p,b,false);toast('Kırmızı alana trafik kazası geldi! (Hasta '+p.n+')','bad');sfx.ambulance();return true}
 function spawnRunner(){if(RUN)return;var g=makePerson(LOOKS.kacan);g.position.set(rnd(-8,8),0,rnd(-1.5,1.5));scene.add(g);RUN={g:g,t:30,state:'run',wp:null,n:++S.pn};RUN.wp=runnerWp();g.userData.pat=RUN;RUN.runner=true;toast('Hasta '+RUN.n+' sedyeden atlayıp kaçıyor!','bad');sfx.alarm()}
 function runnerWp(){var best=null,bd=-1;for(var i=0;i<6;i++){var c={x:rnd(-14,14),z:rnd(-2.2,2.6)};var d=Math.hypot(c.x-camera.position.x,c.z-camera.position.z);if(d>bd){bd=d;best=c}}return best}
-function nextBedEnc(){if(!S.bedPool.length)S.bedPool=shuffle(ENC.filter(function(e){return e.bed&&!e.fixed}));return S.bedPool.pop()}
+function nextBedEnc(){if(!S.bedPool.length){var _bp=shuffle(ENC.filter(function(e){return e.bed&&!e.fixed}));S.bedPool=_bp.filter(function(e){return !/^c_/.test(e.key)}).concat(_bp.filter(function(e){return /^c_/.test(e.key)&&!SEENK[e.key]}).concat(_bp.filter(function(e){return /^c_/.test(e.key)&&SEENK[e.key]}).slice(0,0)))}return S.bedPool.pop()}
 function nextEnc(){if(!S.pool.length)S.pool=poolFresh(false);var e=S.pool.pop();SEENK[e.key]=1;return e}
 function faceMove(g,dx,dz){g.rotation.y=Math.atan2(dx,dz)}
 
@@ -2621,7 +2621,7 @@ EN('enerji',18,'Erkek','Çok fazla enerji içeceği, çarpıntı','“Dört tane
 ]);
 function poolFresh(first){
   var all=ENC.filter(function(e){return !e.bed}),un=shuffle(all.filter(function(e){return !SEENK[e.key]})),sn=shuffle(all.filter(function(e){return SEENK[e.key]}));
-  var pool=sn.concat(un);
+  var nw=function(e){return /^c_/.test(e.key)};var pool=sn.concat(un.filter(function(e){return !nw(e)}),shuffle(un.filter(nw)));
   if(first&&!SEENK.karpuz&&Math.random()<.12){pool=pool.filter(function(e){return e.key!=='karpuz'});pool.push(ENC[0])}
   return pool}
 
@@ -4075,7 +4075,7 @@ targets=function(){var a=_tgV16();a.forEach(function(t){if(t.sub==='Absürt soru
   if(CAT.g&&CAT.st==='sit')a.push({pos:V(CAT.g.position.x,.3,CAT.g.position.z),r:2.2,label:'Kediyi sev',sub:'Triyaj · acilin kedisi',act:petCat});
   return a.filter(function(t){return !(CB.p&&CB.state==='alarm'&&t.label==='Muayene et: Hasta '+CB.p.n)})};
 var _nsV16=newShift;
-newShift=function(){_nsV16();S.food=Math.min(100,(S.food===undefined?80:Math.max(S.food,70)));S.water=Math.max(S.water===undefined?78:S.water,72);HUN.warnF=HUN.warnW=0;SLEEP.v=0;SLEEP.shut=0;
+newShift=function(){_nsV16();if(S.retry){S.retry=0;S.stress=0;S.food=100;S.water=100;S.moral=Math.max(S.moral,10);try{toast('Aynı bölümden yeniden başlıyorsun: stres sıfır, tok ve susuz değilsin.','')}catch(e){}}S.food=Math.min(100,(S.food===undefined?80:Math.max(S.food,70)));S.water=Math.max(S.water===undefined?78:S.water,72);HUN.warnF=HUN.warnW=0;SLEEP.v=0;SLEEP.shut=0;
   ELV.riders=[];ELV.state='idle';ELV.doors=0;ELV.floor=1;try{elvDraw()}catch(e){}CB.state='none';CB.p=null;CB.at=S.DUR*rnd(.42,.62);try{show('#cpr',false);var el=$('#cbBox');if(el)el.hidden=true}catch(e){}};
 var _bV16=build;
 build=function(){_bV16();[buildElev,buildVend,buildCat].forEach(function(f){try{f()}catch(e){if(window.console)console.error(e)}});try{mmBuild()}catch(e){}};
@@ -6172,7 +6172,7 @@ $('#sShk').addEventListener('click',function(e){S.shake=!S.shake;e.target.setAtt
 $('#pResume').addEventListener('click',resumeGame);
 $('#pEnd').addEventListener('click',function(){S.mode='play';endShift(false)});
 $('#pMenu').addEventListener('click',toMenu);
-$('#endNext').addEventListener('click',function(){if(S.over){S.day=0;S.over=null}S.day++;if(S.day>6)S.day=1;startGame()});
+$('#endNext').addEventListener('click',function(){if(S.over){S.over=null;S.retry=1}else{S.day++;S.retry=0}if(S.day>6)S.day=1;if(S.day<1)S.day=1;startGame()});
 $('#drugSearch').addEventListener('input',renderDrugs);
 $('#drugGo').addEventListener('click',drugGo);
 $('#drugX').addEventListener('click',function(){show('#drug',false);S.mode='play';lock()});
