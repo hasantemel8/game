@@ -343,6 +343,20 @@ rep("if(S.hurt>=8)return gameOver('8 hastayı", "if(S.hurt>=12)return gameOver('
 rep("if(S.faints>=3)return gameOver(", "if(S.faints>=4)return gameOver(")
 rep("stress:18+(day-1)*6,moral:7,", "stress:12+(day-1)*3,moral:9,")
 
+# --- 32) yeni (c_) vakalar havuzun başında gelsin ---
+rep("var pool=sn.concat(un);", "var nw=function(e){return /^c_/.test(e.key)};var pool=sn.concat(un.filter(function(e){return !nw(e)}),shuffle(un.filter(nw)));")
+rep("if(!S.bedPool.length)S.bedPool=shuffle(ENC.filter(function(e){return e.bed&&!e.fixed}));return S.bedPool.pop()", "if(!S.bedPool.length){var _bp=shuffle(ENC.filter(function(e){return e.bed&&!e.fixed}));S.bedPool=_bp.filter(function(e){return !/^c_/.test(e.key)}).concat(_bp.filter(function(e){return /^c_/.test(e.key)&&!SEENK[e.key]}).concat(_bp.filter(function(e){return /^c_/.test(e.key)&&SEENK[e.key]}).slice(0,0)))}return S.bedPool.pop()")
+
+# --- 33) elenince aynı bölümden, sıfır stres + tok/su dolu başla ---
+rep("$('#endNext').addEventListener('click',function(){if(S.over){S.day=0;S.over=null}S.day++;if(S.day>6)S.day=1;startGame()});", "$('#endNext').addEventListener('click',function(){if(S.over){S.over=null;S.retry=1}else{S.day++;S.retry=0}if(S.day>6)S.day=1;if(S.day<1)S.day=1;startGame()});")
+rep("newShift=function(){_nsV16();", "newShift=function(){_nsV16();if(S.retry){S.retry=0;S.stress=0;S.food=100;S.water=100;S.moral=Math.max(S.moral,10);try{toast('Aynı bölümden yeniden başlıyorsun: stres sıfır, tok ve susuz değilsin.','')}catch(e){}}")
+
+# --- 34) silah dolabı + savaş ---
+_wr = open(__import__('os').path.join(__import__('os').path.dirname(__import__('os').path.abspath(__file__)), 'war.js'), encoding='utf8').read()
+rep("/* ---------- 6) KIRMIZI ALAN: yaratıcı vakalar + mini oyunlar ---------- */", _wr + "/* ---------- 6) KIRMIZI ALAN: yaratıcı vakalar + mini oyunlar ---------- */")
+rep("label:'İlaç dolabı',sub:'İlaç hazırla'", "label:'Silah dolabı',sub:'Silah ve ilaç'")
+rep("{n:'İlaç Dolabı',h:'ilaç ve serum'", "{n:'Silah Dolabı',h:'silah, ilaç ve serum'")
+
 # decoUp: phong metal; moto vb. başka yuvalar sonraki adımda eklenecek
 open(dst, 'w', encoding='utf8').write(h)
 print('tamam:', dst)
